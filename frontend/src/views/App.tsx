@@ -1,4 +1,4 @@
-import { useCallback, useId, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { lazy, Suspense, useCallback, useId, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { ArrowDownRight, ArrowRight, Braces, ChevronRight, Database as DatabaseIcon, GitFork, KeyRound,
   PanelRight, Plug, RefreshCw, Search, Server, ShieldCheck, Table2 } from 'lucide-react'
 import { sql } from '../controllers/api'
@@ -13,7 +13,7 @@ import { Header } from './Header'
 import { Records } from './Records'
 import { Empty, Failure, Loading } from './States'
 import { Structure } from './Structure'
-import { SqlEditor } from './SqlEditor'
+const SqlEditor = lazy(() => import('./SqlEditor').then((module) => ({ default: module.SqlEditor })))
 
 function Details({ children }: { children: ReactNode }) {
   return <aside className="details"><div className="panel-title"><PanelRight size={15} /><h2>Detalhes</h2></div>
@@ -199,7 +199,7 @@ function ConnectedStudio({ connection, disconnect }: { connection: Connection; d
       </>} />
     <StudioLayout items={explorer.items} connected>
       {database && showSql ? <><main className="workspace"><div className="object-heading"><h1>{database}</h1></div>
-        <SqlEditor key={database} scope={{ session: connection.session, database }} /></main>
+        <Suspense fallback={<Loading />}><SqlEditor key={database} scope={{ session: connection.session, database }} /></Suspense></main>
         <ConnectionDetails connection={connection} database={database} /></>
         : database && table ? <TableWorkspace key={JSON.stringify([database, table.id])} table={table}
         scope={{ session: connection.session, database, tableId: table.id }} refreshKey={refreshKey}

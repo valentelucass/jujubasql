@@ -3,11 +3,13 @@ import { Play } from 'lucide-react'
 import { appError, sql } from '../controllers/api'
 import type { Remote, QueryOutput, Scope } from '../models/sql'
 import { Empty, Failure, Loading } from './States'
+import { SqlCode } from './SqlCode'
 
 export function SqlEditor({ scope }: { scope: Scope }) {
   const [source, setSource] = useState('SELECT TOP (25) name FROM sys.tables ORDER BY name')
   const [result, setResult] = useState<Remote<QueryOutput>>({ status: 'idle' })
   const running = useRef(false)
+  const form = useRef<HTMLFormElement>(null)
   async function run(event: FormEvent) {
     event.preventDefault()
     if (running.current || !source.trim()) return
@@ -19,20 +21,13 @@ export function SqlEditor({ scope }: { scope: Scope }) {
   }
   const output = result.status === 'ready' ? result.data : null
   return <div className="sql-workspace">
-    <form onSubmit={run}>
+    <form ref={form} onSubmit={run}>
       <div className="sql-editor-toolbar">
-        <label htmlFor="sql-code">Consulta SQL</label>
+        <label id="sql-code-label">Consulta SQL</label>
         <span>SELECT · até 200 linhas</span>
         <button className="button primary" disabled={!source.trim() || result.status === 'loading'}><Play size={15} /> Executar</button>
       </div>
-      <textarea id="sql-code" spellCheck={false} maxLength={32768} value={source}
-        onChange={(event) => setSource(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
-            event.preventDefault()
-            event.currentTarget.form?.requestSubmit()
-          }
-        }} />
+      <SqlCode source={source} onChange={setSource} form={form} />
     </form>
     <section className="sql-results" aria-label="Resultados da consulta">
       {result.status === 'idle' && <Empty title="Resultados da consulta" note="Execute o SQL para ver os registros aqui." />}

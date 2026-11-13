@@ -1,11 +1,21 @@
 {
   "name": "nexo-sql",
   "private": true,
-  "version": "0.1.6",
+  "version": "0.1.7",
   "type": "module",
-  "scripts": { "dev": "vite", "build": "tsc --noEmit && vite build", "desktop": "node scripts/desktop.mjs" },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "desktop": "node scripts/desktop.mjs"
+  },
   "dependencies": {
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
     "@fontsource-variable/geist": "^5.2.8",
+    "@lezer/highlight": "^1.2.5",
     "@tauri-apps/api": "^2.9.0",
     "@xyflow/react": "^12.10.0",
     "lucide-react": "^0.468.0",
