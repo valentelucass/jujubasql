@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useId, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { ArrowDownRight, ArrowRight, Braces, ChevronRight, Database as DatabaseIcon, GitFork, KeyRound,
-  PanelRight, Plug, RefreshCw, Search, Server, ShieldCheck, Table2 } from 'lucide-react'
+  PanelRight, Plug, RefreshCw, Search, Server, Table2 } from 'lucide-react'
 import { sql } from '../controllers/api'
 import { useExplorer } from '../controllers/useExplorer'
 import { useTable } from '../controllers/useTable'
@@ -14,6 +14,7 @@ import { Header } from './Header'
 import { Records } from './Records'
 import { Empty, Failure, Loading } from './States'
 import { Structure } from './Structure'
+import { StatusBar } from './StatusBar'
 const SqlEditor = lazy(() => import('./SqlEditor').then((module) => ({ default: module.SqlEditor })))
 
 function Details({ children }: { children: ReactNode }) {
@@ -146,12 +147,6 @@ function DatabaseList({ connection, choose }: { connection: Connection; choose: 
         note={search ? undefined : 'Confira as permissões do login utilizado.'} />}
     </div>
   </main>
-}
-
-function StatusBar({ endpoint, database }: { endpoint?: string; database?: string | null }) {
-  return <footer className="statusbar"><span><ShieldCheck size={13} /> Permissões do SQL Server</span>
-    {database && <span><DatabaseIcon size={12} /> {database}</span>}
-    <span className="status-end">{endpoint ?? 'Sessão local'}</span></footer>
 }
 
 function DatabaseWorkspace({ scope, connection, onTable }: { scope: Scope; connection: Connection; onTable: (table: Table) => void }) {

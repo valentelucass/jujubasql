@@ -374,11 +374,33 @@ code { font-family: var(--mono); }
 .spin { animation: rotate 1s linear infinite; }
 @keyframes rotate { to { transform: rotate(360deg); } }
 .statusbar {
-  display: flex; align-items: center; gap: 16px; padding: 0 12px; background: #101c14;
+  position: relative; display: flex; align-items: center; gap: 16px; padding: 0 12px; background: #101c14;
   border-top: 1px solid var(--line); color: var(--quiet); font-size: 11px;
 }
 .statusbar span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .statusbar svg { color: #88b9a6; }
+.statusbar .status-context { min-width: 0; display: block; overflow: hidden; text-overflow: ellipsis; }
+.statusbar .status-context svg { margin-inline-end: 3px; }
+.statusbar .status-context span { display: inline; }
+.status-links { display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+.status-links a {
+  display: inline-flex; align-items: center; gap: 5px; color: var(--berry-text);
+  text-decoration: none; padding: 3px 0; border-radius: 3px;
+}
+.status-links a svg { color: var(--berry); }
+.status-links a:hover { text-decoration: underline; }
+.status-links a:focus-visible { outline: 2px solid var(--berry); outline-offset: 3px; }
+.status-error {
+  position: absolute; inset-inline-end: 12px; bottom: calc(100% + 6px);
+  background: var(--surface); color: var(--berry-text); border: 1px solid var(--berry-line);
+  padding: 6px 9px; border-radius: 5px; z-index: 4;
+}
+@media (max-width: 580px) {
+  .statusbar { gap: 8px; }
+  .statusbar .status-permissions { display: none; }
+  .status-links { gap: 9px; }
+}
+
 
 .connection-dialog {
   width: min(465px, calc(100vw - 34px)); max-height: calc(100vh - 42px); overflow: auto;
