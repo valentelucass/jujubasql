@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-records"
+description = "Enables the records command without any pre-configured scope."
+commands.allow = ["records"]
+
+[[permission]]
+identifier = "deny-records"
+description = "Denies the records command without any pre-configured scope."
+commands.deny = ["records"]

@@ -1,0 +1,6 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "windows": ["main"],
+  "permissions": ["allow-connect", "allow-disconnect", "allow-schemas", "allow-tables", "allow-structure", "allow-records", "allow-relationships", "allow-database-diagram", "allow-query-read", "allow-update-cell"]
+}

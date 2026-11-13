@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-schemas"
+description = "Enables the schemas command without any pre-configured scope."
+commands.allow = ["schemas"]
+
+[[permission]]
+identifier = "deny-schemas"
+description = "Denies the schemas command without any pre-configured scope."
+commands.deny = ["schemas"]

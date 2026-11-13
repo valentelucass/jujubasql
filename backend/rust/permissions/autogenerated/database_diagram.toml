@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-database-diagram"
+description = "Enables the database_diagram command without any pre-configured scope."
+commands.allow = ["database_diagram"]
+
+[[permission]]
+identifier = "deny-database-diagram"
+description = "Denies the database_diagram command without any pre-configured scope."
+commands.deny = ["database_diagram"]
