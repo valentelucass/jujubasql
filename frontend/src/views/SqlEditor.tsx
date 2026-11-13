@@ -34,15 +34,18 @@ export function SqlEditor({ scope }: { scope: Scope }) {
           }
         }} />
     </form>
-    {result.status === 'loading' && <Loading />}
-    {result.status === 'error' && <Failure error={result.error} />}
-    {output && <>
-      <div className="grid-scroll sql-result"><table className="data-grid">
-        <thead><tr>{output.columns.map((name, index) => <th key={index} scope="col"><span>{name || 'Coluna ' + (index + 1)}</span></th>)}</tr></thead>
-        <tbody>{output.rows.map((row, index) => <tr key={index}>{row.map((value, col) =>
-          <td key={col} title={value ?? undefined}>{value === null ? <em className="null-value">NULL</em> : value}</td>)}</tr>)}</tbody>
-      </table>{!output.rows.length && <Empty title="A consulta não retornou registros" />}</div>
-      <div className="pagination">{output.truncated ? 'Mostrando as primeiras 200 linhas.' : output.rows.length + ' registros'}</div>
-    </>}
+    <section className="sql-results" aria-label="Resultados da consulta">
+      {result.status === 'idle' && <Empty title="Resultados da consulta" note="Execute o SQL para ver os registros aqui." />}
+      {result.status === 'loading' && <Loading />}
+      {result.status === 'error' && <Failure error={result.error} />}
+      {output && <>
+        <div className="grid-scroll sql-result"><table className="data-grid">
+          <thead><tr>{output.columns.map((name, index) => <th key={index} scope="col"><span>{name || 'Coluna ' + (index + 1)}</span></th>)}</tr></thead>
+          <tbody>{output.rows.map((row, index) => <tr key={index}>{row.map((value, col) =>
+            <td key={col} title={value ?? undefined}>{value === null ? <em className="null-value">NULL</em> : value}</td>)}</tr>)}</tbody>
+        </table>{!output.rows.length && <Empty title="A consulta não retornou registros" />}</div>
+        <div className="pagination">{output.truncated ? 'Mostrando as primeiras 200 linhas.' : output.rows.length + ' registros'}</div>
+      </>}
+    </section>
   </div>
 }

@@ -1,6 +1,6 @@
 [package]
 name = "nexo-sql"
-version = "0.1.5"
+version = "0.1.6"
 description = "Explorador local de SQL Server"
 edition = "2021"
 build = "build.rs"

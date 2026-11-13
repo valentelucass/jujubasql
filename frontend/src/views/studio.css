@@ -295,15 +295,20 @@ code { font-family: var(--mono); }
 .diagram-find input { width: min(180px, 23vw); color: inherit; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 7px; padding: 0 8px; }
 .edge-label:hover, .edge-label.highlighted { border-color: #94d6bc; background: #2b4137; }
 
-.sql-workspace { display: flex; flex-direction: column; min-height: 0; flex: 1; }
-.sql-workspace form { padding: 0 14px 12px; }
+.sql-workspace { display: grid; grid-template-rows: minmax(0, 55fr) minmax(0, 45fr); min-height: 0; flex: 1; }
+.sql-workspace form { display: flex; flex-direction: column; min-height: 0; padding: 0 14px 12px; }
 .sql-editor-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
 .sql-editor-toolbar span { color: var(--quiet); margin-inline-end: auto; }
 .sql-workspace textarea, .cell-dialog textarea {
   display: block; width: 100%; min-height: 88px; padding: 10px; resize: vertical;
   border: 1px solid var(--line-strong); border-radius: 8px; background: #171e1a; color: #d6eee2; font: 13px/1.55 var(--mono);
 }
-.sql-workspace textarea { min-height: 140px; max-height: 42vh; }
+.sql-workspace textarea { flex: 1; min-height: 0; resize: none; }
+.sql-results { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.sql-results > .inline-state {
+  min-height: 0; overflow: auto; margin: 0 14px 10px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+}
 .sql-result { margin: 0 14px 10px; border: 1px solid var(--line); border-radius: 8px; }
 .cell-edit { color: inherit; font: inherit; border: 0; background: transparent; display: flex; align-items: center; gap: 8px; }
 .cell-edit:hover { color: #bcebdc; }

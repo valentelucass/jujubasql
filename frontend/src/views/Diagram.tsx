@@ -30,11 +30,48 @@ function TableNode({ data }: NodeProps<RelationNode>) {
   </div>
 }
 
+type Point = { x: number; y: number }
+type Curve = [Point, Point, Point, Point]
+
+function pointOnCurve([start, first, second, end]: Curve, t: number): Point {
+  const u = 1 - t
+  const a = u ** 3
+  const b = 3 * u ** 2 * t
+  const c = 3 * u * t ** 2
+  const d = t ** 3
+  return {
+    x: a * start.x + b * first.x + c * second.x + d * end.x,
+    y: a * start.y + b * first.y + c * second.y + d * end.y,
+  }
+}
+
+function closestLabelPosition(curve: Curve, pointer: Point, previous: number): number {
+  let best = previous
+  let distance = Infinity
+  let low = .14
+  let high = .86
+  for (let pass = 0; pass < 3; pass++) {
+    const step = (high - low) / 24
+    for (let index = 0; index <= 24; index++) {
+      const t = low + step * index
+      const { x, y } = pointOnCurve(curve, t)
+      const candidate = (x - pointer.x) ** 2 + (y - pointer.y) ** 2
+      if (candidate < distance) {
+        best = t
+        distance = candidate
+      }
+    }
+    low = Math.max(.14, best - step)
+    high = Math.min(.86, best + step)
+  }
+  return best
+}
+
 function ForeignKeyEdge({ id, source, target, sourceX, sourceY, targetX, targetY,
   sourcePosition, targetPosition, markerEnd, data }: EdgeProps<RelationEdge>) {
   const { selected, onSelect } = useContext(Selection)
   const { getZoom } = useReactFlow()
-  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const [labelPosition, setLabelPosition] = useState(.5)
   const drag = useRef<{ x: number; y: number; startX: number; startY: number; zoom: number; moved: boolean } | null>(null)
   if (!data) return null
   const highlighted = selected?.id === data.relation.id
@@ -47,8 +84,11 @@ function ForeignKeyEdge({ id, source, target, sourceX, sourceY, targetX, targetY
   const firstY = sourceY + data.offset + (self ? 112 : 0)
   const secondY = targetY + data.offset + (self ? 112 : 0)
   const path = `M ${sourceX},${sourceY} C ${firstX},${firstY} ${secondX},${secondY} ${targetX},${targetY}`
-  const labelX = (sourceX + 3 * firstX + 3 * secondX + targetX) / 8
-  const labelY = (sourceY + 3 * firstY + 3 * secondY + targetY) / 8
+  const curve: Curve = [
+    { x: sourceX, y: sourceY }, { x: firstX, y: firstY },
+    { x: secondX, y: secondY }, { x: targetX, y: targetY },
+  ]
+  const label = pointOnCurve(curve, labelPosition)
   const color = highlighted ? '#8be1c7' : '#52877b'
   const relation = data.relation
 
@@ -69,7 +109,7 @@ function ForeignKeyEdge({ id, source, target, sourceX, sourceY, targetX, targetY
     const y = event.clientY - origin.y
     if (!origin.moved && Math.hypot(x, y) < 4) return
     origin.moved = true
-    setOffset({ x: origin.startX + x / origin.zoom, y: origin.startY + y / origin.zoom })
+    setLabelPosition(closestLabelPosition(curve, { x: origin.startX + x / origin.zoom, y: origin.startY + y / origin.zoom }, labelPosition))
   }
 
   return <>
@@ -78,12 +118,12 @@ function ForeignKeyEdge({ id, source, target, sourceX, sourceY, targetX, targetY
     {endpointBadge(relation.targetPerSource, targetX + (self ? 23 : targetDirection * 34), targetY + (self ? 28 : -15 + data.offset * .14), 'Destinos por origem')}
     <EdgeLabelRenderer>
       <button type="button" className={`edge-label nodrag nopan${highlighted ? ' highlighted' : ''}`}
-        style={{ transform: `translate(-50%, -50%) translate(${labelX + offset.x}px,${labelY + offset.y}px)` }}
+        style={{ transform: `translate(-50%, -50%) translate(${label.x}px,${label.y}px)` }}
         aria-label={`Selecionar restrição ${relation.name}`} aria-pressed={highlighted}
-        title={relation.name + ' · Arraste para mover'}
+        title={relation.name + ' · Arraste ao longo da linha'}
         onPointerDown={(event) => {
           if (event.button !== 0) return
-          drag.current = { x: event.clientX, y: event.clientY, startX: offset.x, startY: offset.y, zoom: getZoom(), moved: false }
+          drag.current = { x: event.clientX, y: event.clientY, startX: label.x, startY: label.y, zoom: getZoom(), moved: false }
           event.currentTarget.setPointerCapture(event.pointerId)
         }}
         onPointerMove={moveLabel} onPointerCancel={() => { drag.current = null }}
