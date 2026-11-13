@@ -17,6 +17,7 @@ export interface Connection {
   endpoint: string
   transport: Transport
   databases: string[]
+  passwordSaveFailed?: boolean
 }
 
 export type Database = string

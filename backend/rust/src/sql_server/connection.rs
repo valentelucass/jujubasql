@@ -164,8 +164,16 @@ pub(super) enum Login {
 }
 
 impl Profile {
+    #[cfg(test)]
     pub fn new(input: ConnectInput) -> Result<Self> {
-        let password = Zeroizing::new(input.password.unwrap_or_default());
+        Self::with_saved_password(input, None)
+    }
+
+    pub fn with_saved_password(
+        input: ConnectInput,
+        saved: Option<Zeroizing<String>>,
+    ) -> Result<Self> {
+        let password = saved.unwrap_or_else(|| Zeroizing::new(input.password.unwrap_or_default()));
         let endpoint = match input.transport {
             Transport::Network => network_endpoint(input.host, input.port)?,
             Transport::Local => {
@@ -208,6 +216,13 @@ impl Profile {
             }
         };
         Ok(Self { endpoint, login })
+    }
+
+    pub fn sql_password(&self) -> Option<&str> {
+        match &self.login {
+            Login::Sql { password, .. } => Some(password.as_str()),
+            Login::Windows => None,
+        }
     }
 
     pub fn endpoint(&self) -> String {

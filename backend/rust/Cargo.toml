@@ -1,6 +1,6 @@
 [package]
 name = "jujubasql"
-version = "0.1.14"
+version = "0.1.15"
 description = "Explorador local de SQL Server"
 edition = "2021"
 build = "build.rs"
@@ -21,6 +21,8 @@ odbc-api = { version = "30.1", default-features = false, features = ["odbc_versi
 sqlparser = { version = "0.63", default-features = false, features = ["std", "visitor"] }
 tauri-plugin-opener = "2"
 tauri-plugin-updater = "2"
+tauri-plugin-single-instance = "2"
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security_Credentials"] }
 
 [profile.release]
 strip = true

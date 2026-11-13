@@ -9,7 +9,7 @@ Aplicativo desktop Windows para consultar bancos de uma instância do SQL Server
 1. Execute o instalador x64 do JujubaSQL. O aplicativo usa o runtime gratuito Microsoft Edge WebView2. O instalador pode baixar o runtime se ele ainda não estiver no Windows.
 2. Abra o JujubaSQL pelo menu Iniciar e selecione **Conectar**.
 3. Se o SQL Server estiver no mesmo Windows, selecione **Neste computador**. Deixe **Instância local** em branco para a instância padrão. Esse modo usa a memória compartilhada do Windows e requer o Microsoft ODBC Driver 18 ou 17 para SQL Server, x64.
-4. Para outro computador, selecione **Pela rede** e informe o nome DNS e a porta TCP do servidor. Use a rede privada ou a VPN, se aplicável. O certificado precisa corresponder ao DNS e ser confiável no Windows. Nos dois modos, escolha um usuário autorizado do SQL Server ou a conta atual do Windows. O JujubaSQL preenche os dados da última conexão bem-sucedida. A senha de SQL é solicitada a cada sessão.
+4. Para outro computador, selecione **Pela rede** e informe o nome DNS e a porta TCP do servidor. Use a rede privada ou a VPN, se aplicável. O certificado precisa corresponder ao DNS e ser confiável no Windows. Nos dois modos, escolha um usuário autorizado do SQL Server ou a conta atual do Windows. O JujubaSQL preenche os dados da última conexão bem-sucedida. A senha de SQL pode ser lembrada neste PC.
 5. Escolha um banco na lista pesquisável ou no explorador. Abra um esquema, a pasta **Tabelas** e uma tabela.
 
 O login deve conseguir abrir o catálogo `master` para descobrir os bancos. Em cada banco, o SQL Server define quais objetos e registros o login pode consultar. A permissão `VIEW DEFINITION` nos objetos relevantes pode permitir classificar mais relações.
@@ -63,6 +63,10 @@ Selecione um banco e abra **Dashboards**. **Visão geral** mostra os objetos vis
 **Ao vivo** mostra solicitações em andamento, tipos de espera, sessões bloqueadoras e atividade de leitura e gravação por arquivo. Use **Só bloqueadas** para focar nos bloqueios por outras sessões. A atualização automática é opcional, roda a cada 15 segundos enquanto o painel está aberto e pausa se a leitura falhar. O painel exige permissão de monitoramento da instância e filtra as solicitações pelo banco selecionado.
 
 Os painéis usam a conexão já aberta e as permissões do login. Estatísticas de partições e histórico podem exigir permissões adicionais de monitoramento. O JujubaSQL só consulta os metadados e o histórico disponível. A granularidade depende dos intervalos que o Query Store registrou.
+
+## Senha salva no Windows
+
+Ao conectar com um usuário do SQL Server, marque **Lembrar senha neste PC**. Após uma conexão bem-sucedida, a senha fica no Gerenciador de Credenciais da sua conta do Windows, vinculada ao servidor, à porta ou instância e ao usuário. Na próxima conexão, clique em **Conectar** para usar a senha salva. Use **Digitar outra senha** para substituí-la ou **Esquecer senha salva** para removê-la.
 
 ## Atualizações no Windows
 

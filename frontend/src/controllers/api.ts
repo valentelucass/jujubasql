@@ -13,7 +13,10 @@ async function call<T>(command: string, args?: Record<string, unknown>): Promise
 }
 
 export const sql = {
-  connect: (input: ConnectionInput) => call<Connection>('connect', { input }),
+  connect: (input: ConnectionInput, useSaved: boolean, remember: boolean) =>
+    call<Connection>('connect', { input, useSaved, remember }),
+  hasSavedPassword: (input: Omit<ConnectionInput, 'password'>) => call<boolean>('has_saved_password', { input }),
+  forgetPassword: (input: Omit<ConnectionInput, 'password'>) => call<void>('forget_password', { input }),
   disconnect: () => call<void>('disconnect'),
   schemas: (scope: Scope) => call<Schema[]>('schemas', { scope }),
   tables: (scope: Scope, schema: Schema) => call<Table[]>('tables', { scope, schema }),

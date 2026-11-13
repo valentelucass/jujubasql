@@ -403,6 +403,7 @@ code { font-family: var(--mono); }
   background: var(--berry-selected); border-color: var(--berry-line); color: var(--berry-text);
 }
 .update-button.available svg { color: var(--berry); }
+.status-version { font-variant-numeric: tabular-nums; color: var(--quiet); }
 .update-dialog progress { width: 100%; margin-top: 10px; accent-color: var(--berry); }
 .update-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
 .status-links a:focus-visible { outline: 2px solid var(--berry); outline-offset: 3px; }
@@ -431,6 +432,11 @@ code { font-family: var(--mono); }
 .connection-dialog fieldset { margin: 18px 0 13px; padding: 0; border: 0; display: grid; gap: 12px; }
 .connection-dialog label { display: grid; gap: 5px; color: #d5e1da; font-size: 12px; min-width: 0; }
 .connection-dialog input, .connection-dialog select { width: 100%; height: 36px; }
+.connection-dialog .remember-password { display: flex; align-items: center; gap: 7px; }
+.remember-password input[type="checkbox"] { width: auto; height: auto; margin: 0; accent-color: var(--berry); }
+.saved-password { display: flex; align-items: center; gap: 7px; }
+.saved-password svg { color: var(--mint); }
+.saved-password-actions { display: flex; flex-wrap: wrap; gap: 8px 14px; }
 .form-row { display: grid; grid-template-columns: 1fr 90px; gap: 10px; }
 .password-field { position: relative; }
 .password-field input { padding-right: 38px; }

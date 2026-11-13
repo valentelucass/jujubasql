@@ -46,8 +46,31 @@ pub async fn dashboard_performance(
 }
 
 #[tauri::command]
-pub async fn connect(input: ConnectInput, state: State<'_, Connections>) -> Result<Connected> {
-    state.connect(input).await
+pub async fn connect(
+    input: ConnectInput,
+    use_saved: Option<bool>,
+    remember: Option<bool>,
+    state: State<'_, Connections>,
+) -> Result<Connected> {
+    state
+        .connect(input, use_saved.unwrap_or(false), remember.unwrap_or(false))
+        .await
+}
+
+#[tauri::command]
+pub fn has_saved_password(input: ConnectInput) -> Result<bool> {
+    match crate::credentials::PasswordKey::for_input(&input) {
+        Some(key) => key.exists(),
+        None => Ok(false),
+    }
+}
+
+#[tauri::command]
+pub fn forget_password(input: ConnectInput) -> Result<()> {
+    if let Some(key) = crate::credentials::PasswordKey::for_input(&input) {
+        key.forget()?;
+    }
+    Ok(())
 }
 
 #[tauri::command]

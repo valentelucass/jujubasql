@@ -37,6 +37,7 @@ pub struct Connected {
     pub endpoint: String,
     pub transport: Transport,
     pub databases: Vec<String>,
+    pub password_save_failed: bool,
 }
 
 #[derive(Clone, Deserialize)]

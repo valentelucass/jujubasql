@@ -3,6 +3,7 @@
 mod catalog;
 mod commands;
 mod connection;
+mod credentials;
 mod edit;
 mod editor;
 mod error;
@@ -11,13 +12,24 @@ mod records;
 mod relationships;
 mod sql_server;
 
+use tauri::Manager;
+
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _, _| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+            }
+        }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(connection::Connections::default())
         .invoke_handler(tauri::generate_handler![
             commands::connect,
+            commands::has_saved_password,
+            commands::forget_password,
             commands::disconnect,
             commands::schemas,
             commands::tables,

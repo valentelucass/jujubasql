@@ -1,4 +1,5 @@
 use crate::{
+    credentials::PasswordKey,
     error::{deadline, AppError, Result},
     models::{ConnectInput, Connected, Scope},
     sql_server::{
@@ -26,8 +27,30 @@ struct Session {
 }
 
 impl Connections {
-    pub async fn connect(&self, input: ConnectInput) -> Result<Connected> {
-        let profile = Arc::new(Profile::new(input)?);
+    pub async fn connect(
+        &self,
+        input: ConnectInput,
+        use_saved: bool,
+        remember: bool,
+    ) -> Result<Connected> {
+        let key = PasswordKey::for_input(&input);
+        let saved = if use_saved && input.password.is_none() {
+            Some(
+                key.as_ref()
+                    .map(PasswordKey::read)
+                    .transpose()?
+                    .flatten()
+                    .ok_or_else(|| {
+                        AppError::new(
+                            "credentials",
+                            "A senha salva não está disponível. Digite a senha para conectar.",
+                        )
+                    })?,
+            )
+        } else {
+            None
+        };
+        let profile = Arc::new(Profile::with_saved_password(input, saved)?);
         let revision = self.clear().await;
         let databases = deadline(async {
             let mut client = profile.open("master").await?;
@@ -44,6 +67,11 @@ impl Connections {
                 "A conexão foi substituída ou encerrada.",
             ));
         }
+        let password_save_failed = remember
+            && key
+                .as_ref()
+                .zip(profile.sql_password())
+                .is_some_and(|(key, password)| key.save(password).is_err());
         state.active = Some(Session {
             profile,
             databases: databases.iter().cloned().collect(),
@@ -53,6 +81,7 @@ impl Connections {
             endpoint,
             transport,
             databases,
+            password_save_failed,
         })
     }
 

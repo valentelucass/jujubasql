@@ -212,7 +212,7 @@ function ConnectedStudio({ connection, disconnect }: { connection: Connection; d
             onTable={(entry) => explorer.chooseRelatedTable(database, entry)} />
         : <><DatabaseList connection={connection} choose={explorer.chooseDatabase} /><ConnectionDetails connection={connection} /></>}
     </StudioLayout>
-    <StatusBar endpoint={connection.endpoint} database={database} />
+    <StatusBar endpoint={connection.endpoint} database={database} passwordSaveFailed={connection.passwordSaveFailed} />
   </>
 }
 
