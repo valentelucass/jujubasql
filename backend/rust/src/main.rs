@@ -24,6 +24,9 @@ fn main() {
             commands::records,
             commands::relationships,
             commands::database_diagram,
+            commands::dashboard_overview,
+            commands::dashboard_storage,
+            commands::dashboard_performance,
             commands::query_read,
             commands::update_cell,
         ])

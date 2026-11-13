@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-dashboard-overview"
+description = "Enables the dashboard_overview command without any pre-configured scope."
+commands.allow = ["dashboard_overview"]
+
+[[permission]]
+identifier = "deny-dashboard-overview"
+description = "Denies the dashboard_overview command without any pre-configured scope."
+commands.deny = ["dashboard_overview"]

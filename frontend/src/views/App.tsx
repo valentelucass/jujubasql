@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useId, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { ArrowDownRight, ArrowRight, Braces, ChevronRight, Database as DatabaseIcon, GitFork, KeyRound,
+import { ArrowDownRight, ArrowRight, Braces, ChartNoAxesCombined, ChevronRight, Database as DatabaseIcon, GitFork, KeyRound,
   PanelRight, Plug, RefreshCw, Search, Server, Table2 } from 'lucide-react'
 import { sql } from '../controllers/api'
 import { useExplorer } from '../controllers/useExplorer'
@@ -16,6 +16,7 @@ import { Empty, Failure, Loading } from './States'
 import { Structure } from './Structure'
 import { StatusBar } from './StatusBar'
 const SqlEditor = lazy(() => import('./SqlEditor').then((module) => ({ default: module.SqlEditor })))
+const DatabaseDashboard = lazy(() => import('./DatabaseDashboard'))
 
 function Details({ children }: { children: ReactNode }) {
   return <aside className="details"><div className="panel-title"><PanelRight size={15} /><h2>Detalhes</h2></div>
@@ -178,23 +179,30 @@ function ConnectedStudio({ connection, disconnect }: { connection: Connection; d
   }
   const [database, setDatabase] = useState<Database | null>(null)
   const [table, setTable] = useState<Table | null>(null)
-  const [showSql, setShowSql] = useState(false)
+  const [workspaceView, setWorkspaceView] = useState<'objects' | 'sql' | 'dashboard'>('objects')
   const [refreshKey, setRefreshKey] = useState(0)
   const explorer = useExplorer(connection, database, table, (db) => {
     setDatabase(db)
     setTable(null)
-    setShowSql(false)
-  }, (db, entry) => { setDatabase(db); setTable(entry); setShowSql(false) })
+    setWorkspaceView('objects')
+  }, (db, entry) => { setDatabase(db); setTable(entry); setWorkspaceView('objects') })
   return <>
     <Header connection={connection} database={database} onDatabase={explorer.chooseDatabase} onDisconnect={closeConnection} disconnecting={disconnecting}
       tools={database && <>
-        <button className="button" aria-pressed={showSql} onClick={() => setShowSql(!showSql)}><Braces size={15} /> SQL</button>
-        {(table || showSql) && <button className="button" onClick={() => { setTable(null); setShowSql(false) }}><GitFork size={15} /> Diagrama do banco</button>}
-        {table && !showSql && <button className="icon-button" title="Atualizar tabela" aria-label="Atualizar tabela"
+        <button className="button" aria-pressed={workspaceView === 'dashboard'}
+          onClick={() => setWorkspaceView(workspaceView === 'dashboard' ? 'objects' : 'dashboard')}>
+          <ChartNoAxesCombined size={15} /> Dashboards</button>
+        <button className="button" aria-pressed={workspaceView === 'sql'}
+          onClick={() => setWorkspaceView(workspaceView === 'sql' ? 'objects' : 'sql')}><Braces size={15} /> SQL</button>
+        {(table || workspaceView !== 'objects') && <button className="button" onClick={() => { setTable(null); setWorkspaceView('objects') }}><GitFork size={15} /> Diagrama do banco</button>}
+        {table && workspaceView === 'objects' && <button className="icon-button" title="Atualizar tabela" aria-label="Atualizar tabela"
           onClick={() => setRefreshKey((value) => value + 1)}><RefreshCw size={16} /></button>}
       </>} />
     <StudioLayout items={explorer.items} connected>
-      {database && showSql ? <><main className="workspace"><div className="object-heading"><h1>{database}</h1></div>
+      {database && workspaceView === 'dashboard' ? <><main className="workspace">
+        <Suspense fallback={<Loading />}><DatabaseDashboard key={database} database={database} session={connection.session} /></Suspense>
+        </main><ConnectionDetails connection={connection} database={database} /></>
+        : database && workspaceView === 'sql' ? <><main className="workspace"><div className="object-heading"><h1>{database}</h1></div>
         <Suspense fallback={<Loading />}><SqlEditor key={database} scope={{ session: connection.session, database }} /></Suspense></main>
         <ConnectionDetails connection={connection} database={database} /></>
         : database && table ? <TableWorkspace key={JSON.stringify([database, table.id])} table={table}

@@ -1,5 +1,6 @@
 pub mod catalog;
 pub mod connection;
+pub mod dashboard;
 mod local;
 pub mod records;
 pub mod relationships;

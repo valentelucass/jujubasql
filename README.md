@@ -56,6 +56,12 @@ Selecione um banco para ver todas as tabelas e relações declaradas que o login
 - Em **Dados → Editar células**, selecione uma célula compatível, informe o valor e revise a prévia antes de gravar. A edição exige permissão de `UPDATE`, chave primária compatível e confirmação. Se o valor original mudou, o JujubaSQL pede para atualizar a tabela. A primeira versão edita uma célula de texto ou de número inteiro por vez.
 - Use uma conta com as permissões adequadas ao trabalho. Para testar gravações, use uma tabela autorizada em um banco de testes.
 
+## Dashboards do banco
+
+Selecione um banco e abra **Dashboards**. **Visão geral** mostra os objetos visíveis e a capacidade alocada nos arquivos. **Armazenamento** compara o espaço usado e reservado pelas maiores tabelas, incluindo seus índices. **Desempenho** consulta o Query Store do banco em períodos de 24 horas, 7 dias ou 30 dias, com duração média, volume e ranking pelo tempo acumulado.
+
+Os painéis usam a conexão já aberta e as permissões do login. Estatísticas de partições e histórico podem exigir permissões adicionais de monitoramento. O JujubaSQL só consulta os metadados e o histórico disponível. A granularidade depende dos intervalos que o Query Store registrou.
+
 ## Validação na empresa
 
 Para testar conexões pela rede, use um DNS coberto pelo certificado do servidor e um login autorizado. Na própria máquina do SQL Server, teste também a conexão por memória compartilhada.
@@ -74,4 +80,5 @@ Com a conexão aprovada, selecione `ETL_SISTEMA` e `ETL_SISTEMA_V2` se ambos est
 - [ByteTable, commit a56ee2d](https://github.com/Rezwanul-Haque/byteTable/tree/a56ee2db01389ae24fbb8b64a3ffddb13375ec45) para arquitetura, catálogo e grade.
 - [VeloxDB, commit ed58ff7](https://github.com/veloxbase/veloxdb/tree/ed58ff79acba554dd56444e54f6cdca64dede246) para árvore e diagrama.
 - [Tabularis SQL Server Plugin, commit 5e03e8d](https://github.com/TabularisDB/tabularis-sqlserver-plugin/blob/5e03e8dec3fe29169e716b78d8c63a0b5091a2c5/src/driver/pool.rs) para autenticação integrada e verificação TLS.
-- [OpenMetadata](https://github.com/open-metadata/OpenMetadata) para catálogo e dependências. [HyperDX](https://github.com/hyperdxio/hyperdx) para controles de filtros e resultados. [Trigger.dev](https://github.com/triggerdotdev/trigger.dev) e [Apache ECharts](https://github.com/apache/echarts-examples) ficam como referências para o histórico de ETL quando houver dados reais.
+- [OpenMetadata](https://github.com/open-metadata/OpenMetadata) para catálogo e dependências. [HyperDX](https://github.com/hyperdxio/hyperdx) para controles de filtros e resultados. [Trigger.dev](https://github.com/triggerdotdev/trigger.dev) como referência para histórico de ETL.
+- [Apache ECharts](https://github.com/apache/echarts-examples) para os gráficos de armazenamento e desempenho. [Grafana para SQL Server](https://github.com/grafana/grafana-mssql-datasource) como referência para séries temporais e filtros por período.

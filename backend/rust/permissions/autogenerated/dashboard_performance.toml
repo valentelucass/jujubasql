@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-dashboard-performance"
+description = "Enables the dashboard_performance command without any pre-configured scope."
+commands.allow = ["dashboard_performance"]
+
+[[permission]]
+identifier = "deny-dashboard-performance"
+description = "Denies the dashboard_performance command without any pre-configured scope."
+commands.deny = ["dashboard_performance"]

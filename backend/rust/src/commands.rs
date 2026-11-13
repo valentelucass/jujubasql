@@ -8,8 +8,34 @@ use crate::{
         RecordsInput, RecordsPage, Relationship, Scope, Structure, Table, TableScope,
     },
     records, relationships,
+    sql_server::dashboard,
 };
 use tauri::State;
+
+#[tauri::command]
+pub async fn dashboard_overview(
+    scope: Scope,
+    state: State<'_, Connections>,
+) -> Result<dashboard::Overview> {
+    dashboard::overview(&state, scope).await
+}
+
+#[tauri::command]
+pub async fn dashboard_storage(
+    scope: Scope,
+    state: State<'_, Connections>,
+) -> Result<Vec<dashboard::TableStorage>> {
+    dashboard::storage(&state, scope).await
+}
+
+#[tauri::command]
+pub async fn dashboard_performance(
+    scope: Scope,
+    hours: i32,
+    state: State<'_, Connections>,
+) -> Result<dashboard::Performance> {
+    dashboard::performance(&state, scope, hours).await
+}
 
 #[tauri::command]
 pub async fn connect(input: ConnectInput, state: State<'_, Connections>) -> Result<Connected> {

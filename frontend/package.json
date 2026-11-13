@@ -1,7 +1,7 @@
 {
   "name": "jujubasql",
   "private": true,
-  "version": "0.1.11",
+  "version": "0.1.12",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,6 +19,7 @@
     "@tauri-apps/api": "^2.9.0",
     "@tauri-apps/plugin-opener": "^2.7.3",
     "@xyflow/react": "^12.10.0",
+    "echarts": "^6.1.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
