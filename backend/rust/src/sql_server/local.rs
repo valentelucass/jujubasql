@@ -22,7 +22,7 @@ pub async fn open(
 ) -> Result<LocalConnection> {
     let server = instance.map_or_else(|| "lpc:.".to_owned(), |name| format!("lpc:.\\{name}"));
     let mut attributes = Zeroizing::new(format!(
-        "Server={server};Database={};Encrypt=Optional;TrustServerCertificate=No;APP=Nexo SQL;",
+        "Server={server};Database={};Encrypt=Optional;TrustServerCertificate=No;APP=JujubaSQL;",
         attribute(database)
     ));
     match login {

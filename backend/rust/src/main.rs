@@ -27,5 +27,5 @@ fn main() {
             commands::update_cell,
         ])
         .run(tauri::generate_context!())
-        .expect("iniciar o Nexo SQL");
+        .expect("iniciar o JujubaSQL");
 }

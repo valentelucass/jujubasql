@@ -240,7 +240,7 @@ impl Profile {
         config.host(host);
         config.port(port);
         config.database(database);
-        config.application_name("Nexo SQL");
+        config.application_name("JujubaSQL");
         config.encryption(EncryptionLevel::Required);
         config.authentication(match &self.login {
             Login::Windows => AuthMethod::Integrated,
@@ -342,7 +342,7 @@ mod tests {
             transport: Transport::Local,
             instance: None,
             authentication: Authentication::Sql,
-            username: Some("NexoSqlTesteLoginInexistente".to_owned()),
+            username: Some("JujubaSqlTesteLoginInexistente".to_owned()),
             password: Some("TesteLocalSemConta123!".to_owned()),
         })
         .expect("perfil local válido");
@@ -356,7 +356,7 @@ mod tests {
     #[test]
     #[ignore = "requer instância de teste com certificado inválido"]
     fn rejects_untrusted_sql_server_certificate() {
-        let host = std::env::var("NEXO_TEST_UNTRUSTED_SQL_HOST")
+        let host = std::env::var("JUJUBASQL_TEST_UNTRUSTED_SQL_HOST")
             .expect("informar o DNS do SQL Server de teste");
         let profile = Profile::new(ConnectInput {
             host,

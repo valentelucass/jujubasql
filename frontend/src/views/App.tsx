@@ -6,6 +6,7 @@ import { useExplorer } from '../controllers/useExplorer'
 import { useTable } from '../controllers/useTable'
 import type { Connection, Database, Relationship, Scope, Structure as TableStructure, Tab, Table, TableScope } from '../models/sql'
 import { ConnectionDialog } from './ConnectionDialog'
+import jujuba from '../assets/jujuba.png'
 import { Diagram, Graph } from './Diagram'
 import { useRemote } from '../controllers/useRemote'
 import { StudioLayout } from './StudioLayout'
@@ -225,7 +226,7 @@ export function App() {
     <StudioLayout items={[]} connected={false}>
       <main className="workspace welcome">
         <div className="welcome-content">
-          <div className="welcome-mark"><DatabaseIcon size={34} strokeWidth={1.4} /></div>
+          <div className="welcome-mark" aria-hidden="true"><img src={jujuba} alt="" /></div>
           <h1>Conecte ao SQL Server</h1>
           <p>Consulte os bancos, explore tabelas e visualize seus relacionamentos.</p>
           <button className="button primary" onClick={() => setDialog(true)}><Plug size={16} /> Nova conexão <ArrowRight size={16} /></button>

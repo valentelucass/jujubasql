@@ -13,5 +13,5 @@ fn main() {
             "update_cell",
         ]),
     ))
-    .expect("preparar permissões e recursos do Nexo SQL");
+    .expect("preparar permissões e recursos do JujubaSQL");
 }

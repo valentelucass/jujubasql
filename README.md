@@ -1,13 +1,15 @@
-# Nexo SQL
+# JujubaSQL
+
+<img src="frontend/src/assets/jujuba.png" alt="Mascote do JujubaSQL" width="112" />
 
 Aplicativo desktop Windows para consultar bancos de uma instância do SQL Server. O Tauri abre a interface React e executa as consultas e alterações autorizadas no backend Rust local.
 
 ## Instalar e conectar
 
-1. Execute o instalador x64 do Nexo SQL. O aplicativo usa o runtime gratuito Microsoft Edge WebView2. O instalador pode baixar o runtime se ele ainda não estiver no Windows.
-2. Abra o Nexo SQL pelo menu Iniciar e selecione **Conectar**.
+1. Execute o instalador x64 do JujubaSQL. O aplicativo usa o runtime gratuito Microsoft Edge WebView2. O instalador pode baixar o runtime se ele ainda não estiver no Windows.
+2. Abra o JujubaSQL pelo menu Iniciar e selecione **Conectar**.
 3. Se o SQL Server estiver no mesmo Windows, selecione **Neste computador**. Deixe **Instância local** em branco para a instância padrão. Esse modo usa a memória compartilhada do Windows e requer o Microsoft ODBC Driver 18 ou 17 para SQL Server, x64.
-4. Para outro computador, selecione **Pela rede** e informe o nome DNS e a porta TCP do servidor. Use a rede privada ou a VPN, se aplicável. O certificado precisa corresponder ao DNS e ser confiável no Windows. Nos dois modos, escolha um usuário autorizado do SQL Server ou a conta atual do Windows. O Nexo preenche os dados da última conexão bem-sucedida. A senha de SQL é solicitada a cada sessão.
+4. Para outro computador, selecione **Pela rede** e informe o nome DNS e a porta TCP do servidor. Use a rede privada ou a VPN, se aplicável. O certificado precisa corresponder ao DNS e ser confiável no Windows. Nos dois modos, escolha um usuário autorizado do SQL Server ou a conta atual do Windows. O JujubaSQL preenche os dados da última conexão bem-sucedida. A senha de SQL é solicitada a cada sessão.
 5. Escolha um banco na lista pesquisável ou no explorador. Abra um esquema, a pasta **Tabelas** e uma tabela.
 
 O login deve conseguir abrir o catálogo `master` para descobrir os bancos. Em cada banco, o SQL Server define quais objetos e registros o login pode consultar. A permissão `VIEW DEFINITION` nos objetos relevantes pode permitir classificar mais relações.
@@ -51,7 +53,7 @@ Selecione um banco para ver todas as tabelas e relações declaradas que o login
 ## Consultar e editar
 
 - **SQL** executa um único `SELECT` no banco escolhido. O editor aceita consultas com junções e CTEs e mostra até 200 linhas. O login deve ter as permissões de leitura exigidas pela consulta.
-- Em **Dados → Editar células**, selecione uma célula compatível, informe o valor e revise a prévia antes de gravar. A edição exige permissão de `UPDATE`, chave primária compatível e confirmação. Se o valor original mudou, o Nexo pede para atualizar a tabela. A primeira versão edita uma célula de texto ou de número inteiro por vez.
+- Em **Dados → Editar células**, selecione uma célula compatível, informe o valor e revise a prévia antes de gravar. A edição exige permissão de `UPDATE`, chave primária compatível e confirmação. Se o valor original mudou, o JujubaSQL pede para atualizar a tabela. A primeira versão edita uma célula de texto ou de número inteiro por vez.
 - Use uma conta com as permissões adequadas ao trabalho. Para testar gravações, use uma tabela autorizada em um banco de testes.
 
 ## Validação na empresa
@@ -62,7 +64,7 @@ Com a conexão aprovada, selecione `ETL_SISTEMA` e `ETL_SISTEMA_V2` se ambos est
 
 ## Testes desta entrega
 
-- Compilação TypeScript e Vite, binário Tauri x64 e pacote NSIS concluídos. A janela do Nexo SQL abriu no Windows e apresentou a tela de conexão.
+- Compilação TypeScript e Vite, binário Tauri x64 e pacote NSIS concluídos. A janela do JujubaSQL abriu no Windows e apresentou a tela de conexão.
 - Três testes Rust locais passaram, cobrindo validação do nome do servidor e cardinalidade. Um teste separado com o conector Rust confirmou a rejeição de um certificado não confiável.
 - O parser T-SQL do SSMS aceitou oito consultas de catálogo e leitura. O teste local da interface, com respostas de teste na ponte, passou para navegação por teclado, troca entre dois bancos, descarte de resposta obsoleta, paginação, ordenação, filtros, estrutura, permissões e FKs compostas e autorreferentes.
 - A descoberta dos bancos e a abertura de tabelas pela conexão local foram verificadas no Windows. Valide o catálogo completo e eventuais gravações em um banco de teste autorizado.

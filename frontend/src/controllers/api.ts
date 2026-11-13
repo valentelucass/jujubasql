@@ -6,7 +6,7 @@ import type {
 
 async function call<T>(command: string, args?: Record<string, unknown>): Promise<T> {
   if (!isTauri()) {
-    throw { kind: 'desktop', message: 'Abra o Nexo SQL pelo aplicativo instalado no Windows.' }
+    throw { kind: 'desktop', message: 'Abra o JujubaSQL pelo aplicativo instalado no Windows.' }
   }
   return invoke<T>(command, args)
 }

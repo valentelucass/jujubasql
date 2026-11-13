@@ -36,16 +36,16 @@ pub async fn apply(connections: &Connections, input: EditInput) -> Result<EditOu
         // The previous value must still match byte-for-byte, including case and whitespace.
         // OUTPUT counts base rows even when SQL Server emits other row counts.
         let sql = format!("SET NOCOUNT ON; SET XACT_ABORT ON; SET ANSI_WARNINGS ON;
-            DECLARE @nexo_changed TABLE (matched int NOT NULL);
-            DECLARE @nexo_count int;
+            DECLARE @jujuba_changed TABLE (matched int NOT NULL);
+            DECLARE @jujuba_count int;
             BEGIN TRANSACTION;
-            UPDATE {qualified} SET {target} = @P1 OUTPUT 1 INTO @nexo_changed
+            UPDATE {qualified} SET {target} = @P1 OUTPUT 1 INTO @jujuba_changed
             WHERE {where_key} AND (({target} IS NULL AND @P2 IS NULL) OR
               (DATALENGTH(CONVERT(nvarchar(max), {target})) = DATALENGTH(@P2)
                AND CONVERT(varbinary(max), CONVERT(nvarchar(max), {target})) = CONVERT(varbinary(max), @P2)));
-            SELECT @nexo_count = COUNT(*) FROM @nexo_changed;
-            IF @nexo_count = 1 COMMIT TRANSACTION ELSE ROLLBACK TRANSACTION;
-            SELECT @nexo_count AS changed;");
+            SELECT @jujuba_count = COUNT(*) FROM @jujuba_changed;
+            IF @jujuba_count = 1 COMMIT TRANSACTION ELSE ROLLBACK TRANSACTION;
+            SELECT @jujuba_count AS changed;");
         let rows = client.query(&sql, &parameters).await?;
         let count = rows.first().map(|row| crate::sql_server::int(row, "changed")).transpose()?;
         match count {

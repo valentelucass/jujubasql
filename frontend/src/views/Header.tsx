@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Check, ChevronDown, Database, Plug, Power, Search } from 'lucide-react'
+import jujuba from '../assets/jujuba.png'
 import type { Connection, Database as DatabaseName } from '../models/sql'
 
 export function Header({ connection, database, onConnect, onDisconnect, onDatabase, tools, disconnecting }: {
@@ -33,7 +34,7 @@ export function Header({ connection, database, onConnect, onDisconnect, onDataba
   }
 
   return <header className="topbar">
-    <div className="wordmark"><span className="brand-mark" aria-hidden="true">N</span><strong>Nexo SQL</strong></div>
+    <div className="wordmark"><span className="brand-mark" aria-hidden="true"><img src={jujuba} alt="" /></span><strong>Jujuba<span>SQL</span></strong></div>
     <div className="header-divider" />
     {connection ? <button className="button header-connect" onClick={onDisconnect} disabled={disconnecting} title="Desconectar">
       <Power size={15} /><span>Desconectar</span></button> :
