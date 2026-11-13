@@ -58,7 +58,9 @@ Selecione um banco para ver todas as tabelas e relações declaradas que o login
 
 ## Dashboards do banco
 
-Selecione um banco e abra **Dashboards**. **Visão geral** mostra os objetos visíveis e a capacidade alocada nos arquivos. **Armazenamento** compara o espaço usado e reservado pelas maiores tabelas, incluindo seus índices. **Desempenho** consulta o Query Store do banco em períodos de 24 horas, 7 dias ou 30 dias, com duração média, volume e ranking pelo tempo acumulado.
+Selecione um banco e abra **Dashboards**. **Visão geral** mostra os objetos visíveis e um gráfico de capacidade por tipo de arquivo. **Armazenamento** compara o espaço usado e reservado pelas maiores tabelas, incluindo seus índices. **Desempenho** consulta o Query Store em períodos de 24 horas, 7 dias ou 30 dias. Alterne entre linha e barras para comparar duração média, número de execuções e tempo acumulado.
+
+**Ao vivo** mostra solicitações em andamento, tipos de espera, sessões bloqueadoras e atividade de leitura e gravação por arquivo. Use **Só bloqueadas** para focar nos bloqueios por outras sessões. A atualização automática é opcional, roda a cada 15 segundos enquanto o painel está aberto e pausa se a leitura falhar. O painel exige permissão de monitoramento da instância e filtra as solicitações pelo banco selecionado.
 
 Os painéis usam a conexão já aberta e as permissões do login. Estatísticas de partições e histórico podem exigir permissões adicionais de monitoramento. O JujubaSQL só consulta os metadados e o histórico disponível. A granularidade depende dos intervalos que o Query Store registrou.
 

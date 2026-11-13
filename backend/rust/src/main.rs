@@ -27,6 +27,7 @@ fn main() {
             commands::dashboard_overview,
             commands::dashboard_storage,
             commands::dashboard_performance,
+            commands::dashboard_live,
             commands::query_read,
             commands::update_cell,
         ])

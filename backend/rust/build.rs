@@ -12,6 +12,7 @@ fn main() {
             "dashboard_overview",
             "dashboard_storage",
             "dashboard_performance",
+            "dashboard_live",
             "query_read",
             "update_cell",
         ]),

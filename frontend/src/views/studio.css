@@ -479,3 +479,11 @@ code { font-family: var(--mono); }
 .dashboard-series .dashboard-table { margin: 10px 0 0; }
 .dashboard-query summary { cursor: pointer; }
 .dashboard-query code { display: block; max-width: 36ch; margin-top: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.dashboard-chart-key, .dashboard-chart-options { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.dashboard-chart-key { margin-top: 8px; color: var(--quiet); font-size: 12px; }
+.dashboard-chart-key span { display: inline-flex; align-items: center; gap: 6px; }
+.dashboard-chart-key i { width: 9px; height: 9px; border-radius: 2px; }
+.dashboard-updated { margin-right: auto; color: var(--quiet); }
+.dashboard-request-heading { margin-bottom: 10px; }
+.dashboard-request-heading h2 { font-size: 15px; }
+.dashboard-blocker { color: var(--berry-text); font-weight: 650; }

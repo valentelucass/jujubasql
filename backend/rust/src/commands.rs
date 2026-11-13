@@ -13,6 +13,14 @@ use crate::{
 use tauri::State;
 
 #[tauri::command]
+pub async fn dashboard_live(
+    scope: Scope,
+    state: State<'_, Connections>,
+) -> Result<dashboard::LiveActivity> {
+    dashboard::live(&state, scope).await
+}
+
+#[tauri::command]
 pub async fn dashboard_overview(
     scope: Scope,
     state: State<'_, Connections>,

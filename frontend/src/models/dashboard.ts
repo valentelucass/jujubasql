@@ -34,3 +34,30 @@ export interface DashboardPerformance {
   timeline: QueryActivity[]
   queries: QueryActivity[]
 }
+
+export interface LiveActivity {
+  total: number
+  waiting: number
+  blocked: number
+  waits: { name: string; count: number }[]
+  requests: {
+    sessionId: number
+    requestId: number
+    status: string
+    command: string
+    elapsedMs: number
+    cpuMs: number
+    waitType: string | null
+    waitMs: number
+    blocker: number
+  }[]
+  files: {
+    name: string
+    reads: number
+    writes: number
+    readMib: number
+    writtenMib: number
+    readWaitMs: number
+    writeWaitMs: number
+  }[]
+}
