@@ -13,6 +13,14 @@ use crate::{
 use tauri::State;
 
 #[tauri::command]
+pub async fn dashboard_files(
+    scope: Scope,
+    state: State<'_, Connections>,
+) -> Result<Vec<dashboard::DatabaseFile>> {
+    dashboard::files(&state, scope).await
+}
+
+#[tauri::command]
 pub async fn dashboard_live(
     scope: Scope,
     state: State<'_, Connections>,

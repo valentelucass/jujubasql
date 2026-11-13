@@ -108,10 +108,9 @@ function Overview({ data }: { data: DashboardOverview }) {
   </>
 }
 
-function Storage({ files, tables }: { files: DashboardOverview['files']; tables: TableStorage[] }) {
+function Storage({ tables }: { tables: TableStorage[] }) {
   const top = tables.slice(0, 8).reverse()
   return <>
-    {files.length > 0 && <FileList files={files} />}
     {tables.length > 0 ? <>
       <section className="dashboard-panel">
         <h2>Maiores tabelas por espaço reservado</h2>
@@ -311,16 +310,59 @@ function LiveDashboard({ database, session }: Scope) {
   </>
 }
 
+function useStorageRead<T>(load: () => Promise<T>) {
+  const [revision, setRevision] = useState(0)
+  const [last, setLast] = useState<T | null>(null)
+  const request = useCallback(() => load(), [load, revision])
+  const result = useRemote(request)
+  useEffect(() => {
+    if (result.status === 'ready') setLast(result.data)
+  }, [result])
+  return {
+    data: result.status === 'ready' ? result.data : last,
+    error: result.status === 'error' ? result.error : null,
+    loading: result.status === 'loading',
+    refresh: () => setRevision((value) => value + 1),
+  }
+}
+
+function StorageDashboard({ database, session }: Scope) {
+  const loadFiles = useCallback(() => sql.dashboardFiles({ database, session }), [database, session])
+  const loadTables = useCallback(() => sql.dashboardStorage({ database, session }), [database, session])
+  const files = useStorageRead(loadFiles)
+  const tables = useStorageRead(loadTables)
+  const loading = files.loading || tables.loading
+  const sameError = files.error && tables.error && files.error.kind === tables.error.kind
+    && files.error.message === tables.error.message
+  function refreshFailed() {
+    if (files.error) files.refresh()
+    if (tables.error) tables.refresh()
+  }
+  return <>
+    <div className="dashboard-actions">
+      <button className="button" disabled={loading} onClick={() => { files.refresh(); tables.refresh() }}>
+        <RefreshCw size={14} /> Atualizar painel
+      </button>
+    </div>
+    {loading && <Loading />}
+    {sameError && files.error && <Failure error={files.error} retry={refreshFailed} />}
+    {!sameError && files.error && <Failure error={files.error} title="Arquivos do banco" retry={files.refresh} />}
+    {files.data && <FileList files={files.data} />}
+    {!sameError && tables.error && <Failure error={tables.error} title="Espaço por tabela" retry={tables.refresh} />}
+    {tables.data && <Storage tables={tables.data} />}
+    {(files.error && files.data || tables.error && tables.data) &&
+      <p className="dashboard-updated" role="status">Parte dos dados exibidos é da última leitura bem-sucedida.</p>}
+  </>
+}
+
 export default function DatabaseDashboard({ database, session }: Scope) {
   const [tab, setTab] = useState<Tab>('overview')
   const [hours, setHours] = useState(24)
   const [revision, setRevision] = useState(0)
   const refresh = () => setRevision((value) => value + 1)
   const overview = useCallback(() => sql.dashboardOverview({ database, session }), [database, session, revision])
-  const storage = useCallback(() => sql.dashboardStorage({ database, session }), [database, session, revision])
   const performance = useCallback(() => sql.dashboardPerformance({ database, session }, hours), [database, session, hours, revision])
-  const summary = useRemote(tab === 'overview' || tab === 'storage' ? overview : null)
-  const sizes = useRemote(tab === 'storage' ? storage : null)
+  const summary = useRemote(tab === 'overview' ? overview : null)
   const history = useRemote(tab === 'performance' ? performance : null)
   return <>
     <div className="object-heading"><div className="breadcrumbs"><Database size={14} />{database}</div>
@@ -330,7 +372,7 @@ export default function DatabaseDashboard({ database, session }: Scope) {
         onClick={() => setTab(id)}><Icon size={15} />{title}</button>)}
     </nav>
     <div className="dashboard-body">
-      {tab !== 'live' && <div className="dashboard-actions">
+      {(tab === 'overview' || tab === 'performance') && <div className="dashboard-actions">
         {tab === 'performance' && <label>Período <select value={hours} onChange={(event) => setHours(Number(event.target.value))}>
           <option value={24}>Últimas 24 horas</option><option value={168}>Últimos 7 dias</option>
           <option value={720}>Últimos 30 dias</option>
@@ -340,12 +382,7 @@ export default function DatabaseDashboard({ database, session }: Scope) {
       {summary.status === 'error' && <Failure error={summary.error} retry={refresh} />}
       {tab === 'overview' && (summary.status === 'ready' ? <Overview data={summary.data} />
         : summary.status !== 'error' && <Loading />)}
-      {tab === 'storage' && (sizes.status === 'ready'
-        ? <Storage files={summary.status === 'ready' ? summary.data.files : []} tables={sizes.data} />
-        : <>
-          {summary.status === 'ready' && summary.data.files.length > 0 && <FileList files={summary.data.files} />}
-          {sizes.status === 'error' ? <Failure error={sizes.error} retry={refresh} /> : <Loading />}
-        </>)}
+      {tab === 'storage' && <StorageDashboard database={database} session={session} />}
       {tab === 'performance' && (history.status === 'ready' ? <Performance data={history.data} hours={hours} />
         : history.status === 'error' ? <Failure error={history.error} retry={refresh} /> : <Loading />)}
       {tab === 'live' && <LiveDashboard database={database} session={session} />}

@@ -2,5 +2,5 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main",
   "windows": ["main"],
-  "permissions": ["core:app:allow-version", "allow-connect", "allow-has-saved-password", "allow-forget-password", "allow-disconnect", "allow-schemas", "allow-tables", "allow-structure", "allow-records", "allow-relationships", "allow-database-diagram", "allow-dashboard-overview", "allow-dashboard-storage", "allow-dashboard-performance", "allow-dashboard-live", "updater:allow-check", "updater:allow-download-and-install", "allow-query-read", "allow-update-cell", {"identifier":"opener:allow-open-url","allow":[{"url":"https://github.com/valentelucass/jujubasql#referências"},{"url":"https://github.com/valentelucass"}]}]
+  "permissions": ["core:app:allow-version", "allow-connect", "allow-has-saved-password", "allow-forget-password", "allow-disconnect", "allow-schemas", "allow-tables", "allow-structure", "allow-records", "allow-relationships", "allow-database-diagram", "allow-dashboard-overview", "allow-dashboard-storage", "allow-dashboard-files", "allow-dashboard-performance", "allow-dashboard-live", "updater:allow-check", "updater:allow-download-and-install", "allow-query-read", "allow-update-cell", {"identifier":"opener:allow-open-url","allow":[{"url":"https://github.com/valentelucass/jujubasql#referências"},{"url":"https://github.com/valentelucass"}]}]
 }

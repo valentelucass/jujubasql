@@ -106,6 +106,17 @@ pub async fn query(
     .await
 }
 
+pub async fn set_dashboard_lock_timeout(connection: LocalConnection) -> Result<()> {
+    blocking(move || {
+        let connection = connection.lock().map_err(|_| local_worker_error())?;
+        connection
+            .execute(super::DASHBOARD_LOCK_TIMEOUT, (), Some(20))
+            .map_err(local_error)?;
+        Ok(())
+    })
+    .await
+}
+
 pub async fn read_editor(connection: LocalConnection, sql: String) -> Result<QueryOutput> {
     blocking(move || {
         let connection = connection.lock().map_err(|_| local_worker_error())?;
@@ -208,6 +219,7 @@ fn local_error(error: odbc_api::Error) -> AppError {
         match record.native_error {
             18452 | 18456 | 18470 | 18486 | 18487 | 18488 => return AppError::authentication(),
             229 | 230 | 297 | 916 | 4060 | 4064 => return AppError::denied(),
+            1222 => return AppError::blocked(),
             _ => {}
         }
         match record.state.as_str() {

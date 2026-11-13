@@ -15,6 +15,19 @@ pub enum SqlClient {
 }
 
 impl SqlClient {
+    pub async fn set_dashboard_lock_timeout(&mut self) -> Result<()> {
+        match self {
+            Self::Local(connection) => local::set_dashboard_lock_timeout(connection.clone()).await,
+            Self::Network(client) => {
+                client
+                    .simple_query(super::DASHBOARD_LOCK_TIMEOUT)
+                    .await?
+                    .into_results()
+                    .await?;
+                Ok(())
+            }
+        }
+    }
     pub async fn read_editor(&mut self, sql: &str) -> Result<QueryOutput> {
         match self {
             Self::Local(connection) => local::read_editor(connection.clone(), sql.to_owned()).await,

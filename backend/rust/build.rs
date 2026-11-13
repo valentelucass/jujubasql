@@ -13,6 +13,7 @@ fn main() {
             "database_diagram",
             "dashboard_overview",
             "dashboard_storage",
+            "dashboard_files",
             "dashboard_performance",
             "dashboard_live",
             "query_read",

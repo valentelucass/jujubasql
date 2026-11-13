@@ -16,6 +16,7 @@ pub enum Parameter {
 }
 
 pub const EDITOR_LIMIT: usize = 200;
+const DASHBOARD_LOCK_TIMEOUT: &str = "SET LOCK_TIMEOUT 3500";
 
 fn editor_row_limit() -> String {
     format!("SET ROWCOUNT {}", EDITOR_LIMIT + 1)

@@ -27,6 +27,10 @@ impl AppError {
             "O login não tem acesso a este banco ou objeto.",
         )
     }
+
+    pub const fn blocked() -> Self {
+        Self::new("blocked", "Outra operação está bloqueando esta leitura no SQL Server. Tente novamente em instantes.")
+    }
 }
 
 impl From<tiberius::error::Error> for AppError {
@@ -38,6 +42,7 @@ impl From<tiberius::error::Error> for AppError {
                     Self::authentication()
                 }
                 229 | 230 | 297 | 916 | 4060 | 4064 => Self::denied(),
+                1222 => Self::blocked(),
                 208 => Self::new("catalog", "O objeto mudou ou foi removido. Atualize o explorador."),
                 _ => Self::new("query", "O SQL Server não conseguiu concluir a leitura."),
             },

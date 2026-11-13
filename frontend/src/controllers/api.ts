@@ -1,5 +1,5 @@
 import { invoke, isTauri } from '@tauri-apps/api/core'
-import type { DashboardOverview, DashboardPerformance, LiveActivity, TableStorage } from '../models/dashboard'
+import type { DatabaseFile, DashboardOverview, DashboardPerformance, LiveActivity, TableStorage } from '../models/dashboard'
 import type {
   AppError, Connection, ConnectionInput, DatabaseDiagram, EditInput, QueryOutput, PageRequest, RecordsPage, Relationship,
   Schema, Scope, Structure, Table, TableScope,
@@ -29,6 +29,7 @@ export const sql = {
   dashboardOverview: (scope: Scope) => call<DashboardOverview>('dashboard_overview', { scope }),
   dashboardLive: (scope: Scope) => call<LiveActivity>('dashboard_live', { scope }),
   dashboardStorage: (scope: Scope) => call<TableStorage[]>('dashboard_storage', { scope }),
+  dashboardFiles: (scope: Scope) => call<DatabaseFile[]>('dashboard_files', { scope }),
   dashboardPerformance: (scope: Scope, hours: number) =>
     call<DashboardPerformance>('dashboard_performance', { scope, hours }),
   relationships: (scope: TableScope) => call<Relationship[]>('relationships', { scope }),

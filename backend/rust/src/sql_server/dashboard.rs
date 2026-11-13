@@ -18,7 +18,7 @@ pub struct Overview {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct DatabaseFile {
+pub struct DatabaseFile {
     name: String,
     kind: String,
     size_mib: f64,
@@ -179,6 +179,7 @@ pub async fn live(connections: &Connections, scope: Scope) -> Result<LiveActivit
 pub async fn overview(connections: &Connections, scope: Scope) -> Result<Overview> {
     deadline(async {
         let mut client = connections.open_database(&scope).await?;
+        client.set_dashboard_lock_timeout().await?;
         let counts = client.query(
             "SELECT
                 CONVERT(varchar(24), (SELECT COUNT_BIG(*) FROM sys.tables WHERE is_ms_shipped = 0)) AS tables,
@@ -188,24 +189,7 @@ pub async fn overview(connections: &Connections, scope: Scope) -> Result<Overvie
             &[],
         ).await?;
         let counts = counts.first().ok_or_else(unexpected_catalog)?;
-        let files = client.query(
-            "SELECT name, type_desc AS kind,
-                CONVERT(varchar(40), CONVERT(decimal(24,3), size / 128.0)) AS size_mib,
-                CONVERT(varchar(40), CONVERT(decimal(24,3), CASE WHEN type = 0
-                    THEN FILEPROPERTY(name, 'SpaceUsed') / 128.0 END)) AS used_mib
-             FROM sys.database_files ORDER BY type, file_id",
-            &[],
-        ).await?.iter().map(|row| {
-            let used_mib = optional_text(row, "used_mib")?
-                .map(|value| value.parse().map_err(|_| unexpected_catalog()))
-                .transpose()?;
-            Ok(DatabaseFile {
-                name: text(row, "name")?,
-                kind: text(row, "kind")?,
-                size_mib: number(row, "size_mib")?,
-                used_mib,
-            })
-        }).collect::<Result<_>>()?;
+        let files = read_files(&mut client).await?;
         Ok(Overview {
             tables: number(counts, "tables")?,
             views: number(counts, "views")?,
@@ -216,9 +200,45 @@ pub async fn overview(connections: &Connections, scope: Scope) -> Result<Overvie
     }).await
 }
 
+pub async fn files(connections: &Connections, scope: Scope) -> Result<Vec<DatabaseFile>> {
+    deadline(async {
+        let mut client = connections.open_database(&scope).await?;
+        client.set_dashboard_lock_timeout().await?;
+        read_files(&mut client).await
+    })
+    .await
+}
+
+async fn read_files(client: &mut SqlClient) -> Result<Vec<DatabaseFile>> {
+    client
+        .query(
+            "SELECT name, type_desc AS kind,
+                CONVERT(varchar(40), CONVERT(decimal(24,3), size / 128.0)) AS size_mib,
+                CONVERT(varchar(40), CONVERT(decimal(24,3), CASE WHEN type = 0
+                    THEN FILEPROPERTY(name, 'SpaceUsed') / 128.0 END)) AS used_mib
+             FROM sys.database_files ORDER BY type, file_id",
+            &[],
+        )
+        .await?
+        .iter()
+        .map(|row| {
+            let used_mib = optional_text(row, "used_mib")?
+                .map(|value| value.parse().map_err(|_| unexpected_catalog()))
+                .transpose()?;
+            Ok(DatabaseFile {
+                name: text(row, "name")?,
+                kind: text(row, "kind")?,
+                size_mib: number(row, "size_mib")?,
+                used_mib,
+            })
+        })
+        .collect()
+}
+
 pub async fn storage(connections: &Connections, scope: Scope) -> Result<Vec<TableStorage>> {
     deadline(async {
         let mut client = connections.open_database(&scope).await?;
+        client.set_dashboard_lock_timeout().await?;
         client.query(
             "SELECT TOP (30) s.name AS schema_name, t.name,
                 CONVERT(varchar(24), SUM(CASE WHEN p.index_id < 2 THEN p.row_count ELSE 0 END)) AS row_count,

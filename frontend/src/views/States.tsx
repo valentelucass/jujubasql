@@ -5,9 +5,9 @@ export function Loading() {
   return <div className="inline-state" role="status"><LoaderCircle className="spin" size={19} /> Carregando…</div>
 }
 
-export function Failure({ error, retry }: { error: AppError; retry?: () => void }) {
+export function Failure({ error, retry, title }: { error: AppError; retry?: () => void; title?: string }) {
   return <div className="inline-state failure" role="alert"><AlertCircle size={20} />
-    <strong>{error.kind === 'authorization' ? 'Sem acesso' : 'Falha na leitura'}</strong>
+    <strong>{title ?? (error.kind === 'authorization' ? 'Sem acesso' : 'Falha na leitura')}</strong>
     <span>{error.message}</span>{retry && <button className="button" onClick={retry}>Tentar novamente</button>}
   </div>
 }
