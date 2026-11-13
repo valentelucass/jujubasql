@@ -288,6 +288,10 @@ code { font-family: var(--mono); }
 .diagram-canvas .react-flow__node.dragging { cursor: grabbing; }
 .diagram-node.current { border-color: #91ca8b; }
 .diagram-node.highlighted { border-color: var(--berry-line); background: #233a29; }
+.diagram-node.active { border-color: var(--berry); background: var(--berry-selected); }
+.diagram-node.active > div { background: var(--berry-button); color: var(--berry-text); }
+.diagram-node.active > div :is(svg, small) { color: var(--berry-text); }
+.diagram-markers { position: absolute; }
 .diagram-node > div { display: flex; align-items: center; gap: 8px; padding: 9px; background: #203729; }
 .diagram-node > div svg { color: var(--mint); }
 .diagram-node small, .diagram-node strong { display: block; max-width: 156px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -305,6 +309,7 @@ code { font-family: var(--mono); }
 .edge-cardinality text { fill: #c4ebbf; font: 650 13px var(--mono); }
 .edge-cardinality.highlighted rect { fill: var(--berry-selected); stroke: var(--berry-line); }
 .edge-cardinality.highlighted text { fill: var(--berry-text); }
+.edge-cardinality.dimmed { opacity: .5; }
 .cardinality-legend { margin-inline-start: auto; display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; }
 .cardinality-legend code, .cardinality-detail code {
   display: inline-block; border: 1px solid #486658; border-radius: 5px; color: #c4ebbf;
@@ -316,6 +321,7 @@ code { font-family: var(--mono); }
 .cardinality-detail small { color: var(--quiet); margin-top: 2px; }
 .edge-label { cursor: grab; touch-action: none; user-select: none; }
 .edge-label:active { cursor: grabbing; }
+.edge-label.compact:not(:focus-visible, :hover, :active) { opacity: 0; pointer-events: none; }
 .diagram-find form { display: flex; gap: 5px; }
 .diagram-find input { width: min(180px, 23vw); color: inherit; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 7px; padding: 0 8px; }
 .edge-label:hover { border-color: #9acb98; background: #294632; }

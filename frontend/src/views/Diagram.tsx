@@ -1,29 +1,34 @@
 import {
-  Background, BaseEdge, EdgeLabelRenderer, Handle, MarkerType, Panel, Position, ReactFlow, useReactFlow, useStore,
+  Background, BaseEdge, EdgeLabelRenderer, Handle, Panel, Position, ReactFlow, useReactFlow, useStore,
   type Edge, type EdgeProps, type Node, type NodeProps,
 } from '@xyflow/react'
 import { GitFork, Maximize, Minus, Plus, Table2 } from 'lucide-react'
-import { createContext, useContext, useMemo, useRef, useState, type PointerEvent } from 'react'
+import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type PointerEvent } from 'react'
 import type { Relationship, Remote, Table } from '../models/sql'
 import { Failure, Loading } from './States'
 
-type RelationNode = Node<{ table: Table; columns: string[]; current: boolean }, 'relationTable'>
+const portSpacing = 28
+const stemLength = 56
+type Port = { id: string; type: 'source' | 'target'; side: Position.Left | Position.Right; offset: number }
+type RelationNode = Node<{ table: Table; columns: string[]; current: boolean; ports: Port[] }, 'relationTable'>
 type RelationEdge = Edge<{
-  relation: Relationship; offset: number
+  relation: Relationship; offset: number; compact: boolean
 }, 'foreignKey'>
 
-const Selection = createContext<Pick<GraphProps, 'selected' | 'onSelect'>>({ selected: null, onSelect: () => {} })
+const Selection = createContext<Pick<GraphProps, 'selected' | 'onSelect'> & {
+  activeTable: number | null; hoveredEdge: string | null; arrowId: string
+  hoverEdge: (id: string | null) => void
+}>({ selected: null, activeTable: null, hoveredEdge: null, arrowId: '', onSelect: () => {}, hoverEdge: () => {} })
 
 function TableNode({ data }: NodeProps<RelationNode>) {
-  const { selected } = useContext(Selection)
+  const { selected, activeTable } = useContext(Selection)
+  const active = data.table.id === activeTable
   const highlighted = data.table.id === selected?.source.id || data.table.id === selected?.target.id
-  return <div className={`diagram-node${data.current ? ' current' : ''}${highlighted ? ' highlighted' : ''}`}>
-    <Handle type="target" position={Position.Left} id="target-left" />
-    <Handle type="target" position={Position.Right} id="target-right" />
-    <Handle type="source" position={Position.Left} id="source-left" />
-    <Handle type="source" position={Position.Right} id="source-right" />
-    <Handle type="source" position={Position.Bottom} id="loop-source" style={{ left: '38%' }} />
-    <Handle type="target" position={Position.Bottom} id="loop-target" style={{ left: '62%' }} />
+  const portHeight = Math.max(0, ...data.ports.map(({ offset }) => Math.abs(offset) * 2 + portSpacing))
+  return <div className={`diagram-node${data.current ? ' current' : ''}${highlighted ? ' highlighted' : ''}${active ? ' active' : ''}`}
+    style={{ minHeight: portHeight }}>
+    {data.ports.map(({ id, type, side, offset }) =>
+      <Handle key={id} type={type} position={side} id={id} style={{ top: `calc(50% + ${offset}px)` }} />)}
     <div><Table2 size={15} /><span title={`${data.table.schema}.${data.table.name}`}><small>{data.table.schema}</small>
       <strong>{data.table.name}</strong></span></div>
     <ul>{data.columns.map((column) => <li key={column} title={column}>{column}</li>)}</ul>
@@ -68,34 +73,34 @@ function closestLabelPosition(curve: Curve, pointer: Point, previous: number): n
 }
 
 function ForeignKeyEdge({ id, source, target, sourceX, sourceY, targetX, targetY,
-  sourcePosition, targetPosition, markerEnd, data }: EdgeProps<RelationEdge>) {
-  const { selected, onSelect } = useContext(Selection)
+  sourcePosition, targetPosition, data }: EdgeProps<RelationEdge>) {
+  const { selected, activeTable, hoveredEdge, arrowId, onSelect, hoverEdge } = useContext(Selection)
   const { getZoom } = useReactFlow()
   const [labelPosition, setLabelPosition] = useState(.5)
   const drag = useRef<{ x: number; y: number; startX: number; startY: number; zoom: number; moved: boolean } | null>(null)
   if (!data) return null
-  const highlighted = selected?.id === data.relation.id
+  const relation = data.relation
+  const selectedEdge = selected?.id === relation.id
+  const highlighted = selectedEdge || activeTable === relation.source.id || activeTable === relation.target.id
+  const dimmed = activeTable !== null && !highlighted
+  const showLabel = !data.compact || (hoveredEdge === null ? selectedEdge : hoveredEdge === id)
   const self = source === target
   const sourceDirection = sourcePosition === Position.Left ? -1 : 1
   const targetDirection = targetPosition === Position.Left ? -1 : 1
-  const span = Math.max(65, Math.abs(targetX - sourceX) * .45)
-  const firstX = self ? sourceX - 54 : sourceX + sourceDirection * span
-  const secondX = self ? targetX + 54 : targetX + targetDirection * span
-  const firstY = sourceY + data.offset + (self ? 112 : 0)
-  const secondY = targetY + data.offset + (self ? 112 : 0)
-  const path = `M ${sourceX},${sourceY} C ${firstX},${firstY} ${secondX},${secondY} ${targetX},${targetY}`
-  const curve: Curve = [
-    { x: sourceX, y: sourceY }, { x: firstX, y: firstY },
-    { x: secondX, y: secondY }, { x: targetX, y: targetY },
-  ]
+  const start = { x: sourceX + sourceDirection * stemLength, y: sourceY }
+  const end = { x: targetX + targetDirection * stemLength, y: targetY }
+  const span = self ? 128 + data.offset : Math.max(28, Math.abs(end.x - start.x) * .45)
+  const first = { x: start.x + sourceDirection * span, y: start.y + (self ? 0 : data.offset) }
+  const second = { x: end.x + targetDirection * span, y: end.y + (self ? 0 : data.offset) }
+  const curve: Curve = [start, first, second, end]
+  const path = `M ${sourceX},${sourceY} L ${start.x},${start.y} C ${first.x},${first.y} ${second.x},${second.y} ${end.x},${end.y} L ${targetX},${targetY}`
   const label = pointOnCurve(curve, labelPosition)
-  const color = highlighted ? '#a4dea5' : '#679970'
-  const relation = data.relation
 
   function endpointBadge(value: string | null, x: number, y: number, side: string) {
     const label = value ?? '?'
     const width = label.length * 8 + 12
-    return <g className={`edge-cardinality${highlighted ? ' highlighted' : ''}`} aria-label={`${side}: ${value ?? 'indeterminada'}`}>
+    return <g className={`edge-cardinality${highlighted ? ' highlighted' : ''}${dimmed ? ' dimmed' : ''}`}
+      aria-label={`${side}: ${value ?? 'indeterminada'}`}>
       <title>{side} · {value ?? 'Cardinalidade indeterminada'}</title>
       <rect x={x - width / 2} y={y - 10} width={width} height={20} rx={6} />
       <text x={x} y={y} textAnchor="middle" dominantBaseline="central">{label}</text>
@@ -113,14 +118,17 @@ function ForeignKeyEdge({ id, source, target, sourceX, sourceY, targetX, targetY
   }
 
   return <>
-    <BaseEdge id={id} path={path} markerEnd={markerEnd} style={{ stroke: color, strokeWidth: highlighted ? 2.2 : 1.5 }} />
-    {endpointBadge(relation.sourcePerTarget, sourceX + (self ? -23 : sourceDirection * 34), sourceY + (self ? 28 : -15 + data.offset * .14), 'Origens por destino')}
-    {endpointBadge(relation.targetPerSource, targetX + (self ? 23 : targetDirection * 34), targetY + (self ? 28 : -15 + data.offset * .14), 'Destinos por origem')}
+    <BaseEdge id={id} path={path} markerEnd={`url(#${arrowId}-${highlighted ? 'pink' : 'green'})`}
+      style={{ stroke: highlighted ? 'var(--berry)' : '#679970', strokeWidth: highlighted ? 2.3 : 1.5, opacity: dimmed ? .4 : 1 }} />
+    {endpointBadge(relation.sourcePerTarget, sourceX + sourceDirection * 31, sourceY - 11, 'Origens por destino')}
+    {endpointBadge(relation.targetPerSource, targetX + targetDirection * 31, targetY - 11, 'Destinos por origem')}
     <EdgeLabelRenderer>
-      <button type="button" className={`edge-label nodrag nopan${highlighted ? ' highlighted' : ''}`}
+      <button type="button" className={`edge-label nodrag nopan${highlighted ? ' highlighted' : ''}${showLabel ? '' : ' compact'}`}
         style={{ transform: `translate(-50%, -50%) translate(${label.x}px,${label.y}px)` }}
-        aria-label={`Selecionar restrição ${relation.name}`} aria-pressed={highlighted}
+        aria-label={`Selecionar restrição ${relation.name}`} aria-pressed={selectedEdge}
         title={relation.name + ' · Arraste ao longo da linha'}
+        onPointerEnter={() => { if (data.compact) hoverEdge(id) }}
+        onPointerLeave={() => { if (data.compact) hoverEdge(null) }}
         onPointerDown={(event) => {
           if (event.button !== 0) return
           drag.current = { x: event.clientX, y: event.clientY, startX: label.x, startY: label.y, zoom: getZoom(), moved: false }
@@ -133,7 +141,6 @@ function ForeignKeyEdge({ id, source, target, sourceX, sourceY, targetX, targetY
           if (!moved || event.detail === 0) onSelect(relation)
         }}>
         {relation.columns.map((pair) => <span key={pair.ordinal}>{pair.source} → {pair.target}</span>)}
-
       </button>
     </EdgeLabelRenderer>
   </>
@@ -162,29 +169,60 @@ function makeLayout(table: Table | undefined, relations: Relationship[], allTabl
     group.push(relation)
     groups.set(key, group)
   }
-  const y = { left: 0, right: 0 }
   const ordered = Array.from(tables.values())
   const rowSize = Math.min(10, Math.max(3, Math.ceil(Math.sqrt(ordered.length))))
   const nodeLayouts = ordered.map(({ table: entry, columns }, index) => {
-    if (!table) {
-      return { entry, columns: Array.from(columns), position: { x: (index % rowSize) * 380, y: Math.floor(index / rowSize) * 270 } }
-    }
     const side = outgoing.has(entry.id) ? 'right' : 'left'
-    const x = entry.id === table.id ? 0 : side === 'right' ? 650 : -650
-    const position = { x, y: x ? y[side] : 40 }
-    if (x) y[side] += 92 + Math.min(8, columns.size) * 21
-    return { entry, columns: Array.from(columns), position }
+    const x = table ? (entry.id === table.id ? 0 : side === 'right' ? 650 : -650) : (index % rowSize) * 450
+    return { entry, columns: Array.from(columns), index, side, position: { x, y: 0 }, ports: [] as Port[] }
   })
-  const nodePositions = new Map(nodeLayouts.map(({ entry, position }) => [entry.id, position]))
-  const edgeLayouts = Array.from(groups.values()).flatMap((group) => group.map((relation, index) => {
-    const self = relation.source.id === relation.target.id
+  type NodeLayout = (typeof nodeLayouts)[number]
+  const nodesById = new Map(nodeLayouts.map((node) => [node.entry.id, node]))
+  const connections = new Map<string, Array<{ port: Port; neighbor: number }>>()
+
+  function addPort(node: NodeLayout, neighbor: NodeLayout, id: string, type: Port['type'], side: Port['side']) {
+    const port = { id, type, side, offset: 0 }
+    node.ports.push(port)
+    const key = `${node.entry.id}:${side}`
+    const entries = connections.get(key) ?? []
+    entries.push({ port, neighbor: neighbor.index })
+    connections.set(key, entries)
+    return id
+  }
+
+  const edgeLayouts = Array.from(groups.values()).flatMap((group) => {
     const spacing = 58 + Math.max(...group.map((item) => item.columns.length)) * 20
-    return {
-      relation,
-      rightward: (nodePositions.get(relation.target.id)?.x ?? 0) >= (nodePositions.get(relation.source.id)?.x ?? 0),
-      offset: self ? index * spacing : (index - (group.length - 1) / 2) * spacing * 1.35,
+    return group.map((relation, index) => {
+      const source = nodesById.get(relation.source.id)!
+      const target = nodesById.get(relation.target.id)!
+      const self = source === target
+      const rightward = target.position.x >= source.position.x
+      const sameColumn = target.position.x === source.position.x
+      return {
+        relation,
+        sourceHandle: addPort(source, target, `source-${relation.id}`, 'source', rightward ? Position.Right : Position.Left),
+        targetHandle: addPort(target, source, `target-${relation.id}`, 'target', sameColumn || !rightward ? Position.Right : Position.Left),
+        offset: self ? index * spacing * .5 : (index - (group.length - 1) / 2) * spacing,
+      }
+    })
+  })
+  for (const entries of connections.values()) {
+    entries.sort((a, b) => a.neighbor - b.neighbor)
+    entries.forEach(({ port }, index) => { port.offset = (index - (entries.length - 1) / 2) * portSpacing })
+  }
+  const rows = new Map<number | string, number>()
+  for (const node of nodeLayouts) {
+    const height = Math.max(62 + Math.min(8, node.columns.length) * 21,
+      ...node.ports.map(({ offset }) => 2 * Math.abs(offset) + portSpacing))
+    if (table) {
+      node.position.y = node.position.x ? rows.get(node.side) ?? 0 : 40
+      if (node.position.x) rows.set(node.side, node.position.y + height + 38)
+    } else {
+      const row = Math.floor(node.index / rowSize)
+      node.position.y = rows.get(row) ?? 0
+      rows.set(row + 1, Math.max(rows.get(row + 1) ?? 0, node.position.y + Math.max(245, height + 90)))
     }
-  }))
+  }
   return { nodeLayouts, edgeLayouts }
 }
 
@@ -193,7 +231,7 @@ interface GraphProps {
   tables?: Table[]
   relations: Relationship[]
   selected: Relationship | null
-  onSelect: (relation: Relationship) => void
+  onSelect: (relation: Relationship | null) => void
   onTable: (table: Table) => void
 }
 
@@ -229,25 +267,34 @@ const noTables: Table[] = []
 
 export function Graph({ table, tables = noTables, relations, selected, onSelect, onTable }: GraphProps) {
   const layout = useMemo(() => makeLayout(table, relations, tables), [table, relations, tables])
-  const selection = useMemo(() => ({ selected, onSelect }), [selected, onSelect])
-  const nodes = useMemo<RelationNode[]>(() => layout.nodeLayouts.map(({ entry, columns, position }) => ({
+  const [activeTable, setActiveTable] = useState<number | null>(null)
+  const [hoveredEdge, setHoveredEdge] = useState<string | null>(null)
+  const arrowId = useId()
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const hoverEdge = useMemo(() => (id: string | null) => {
+    clearTimeout(hoverTimeout.current)
+    if (id === null) hoverTimeout.current = setTimeout(() => setHoveredEdge(null), 120)
+    else setHoveredEdge(id)
+  }, [])
+  useEffect(() => () => clearTimeout(hoverTimeout.current), [])
+  const selection = useMemo(() => ({ selected, activeTable, hoveredEdge, arrowId, onSelect, hoverEdge }),
+    [selected, activeTable, hoveredEdge, arrowId, onSelect, hoverEdge])
+  const nodes = useMemo<RelationNode[]>(() => layout.nodeLayouts.map(({ entry, columns, position, ports }) => ({
     id: String(entry.id), position, type: 'relationTable',
     ariaLabel: `Tabela ${entry.schema}.${entry.name}`,
-    data: { table: entry, columns, current: entry.id === table?.id },
+    data: { table: entry, columns, ports, current: entry.id === table?.id },
   })), [layout, table?.id])
-  const edges = useMemo<RelationEdge[]>(() => layout.edgeLayouts.map(({ relation, offset, rightward }) => {
-    const source = String(relation.source.id)
-    const target = String(relation.target.id)
-    const self = source === target
-    return {
-      id: String(relation.id), source, target, type: 'foreignKey',
-      sourceHandle: self ? 'loop-source' : rightward ? 'source-right' : 'source-left',
-      targetHandle: self ? 'loop-target' : rightward ? 'target-left' : 'target-right',
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#679970' },
-      ariaLabel: relation.name,
-      data: { relation, offset },
-    }
-  }), [layout])
+  const edges = useMemo<RelationEdge[]>(() => layout.edgeLayouts.map(({ relation, offset, sourceHandle, targetHandle }) => ({
+    id: String(relation.id), source: String(relation.source.id), target: String(relation.target.id), type: 'foreignKey',
+    sourceHandle, targetHandle, ariaLabel: relation.name, selectable: false,
+    data: { relation, offset, compact: layout.edgeLayouts.length > 2 },
+  })), [layout])
+
+  function selectTable(id: number | null) {
+    setActiveTable(id)
+    setHoveredEdge(null)
+    onSelect(null)
+  }
 
   return <Selection.Provider value={selection}><div className="diagram-pane">
     <div className="diagram-toolbar"><GitFork size={16} />
@@ -259,10 +306,22 @@ export function Graph({ table, tables = noTables, relations, selected, onSelect,
       </div>}
     </div>
     <div className="diagram-canvas">
+      <svg className="diagram-markers" width="0" height="0" aria-hidden="true">
+        <defs>
+          <marker id={`${arrowId}-green`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9"
+            markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#679970" /></marker>
+          <marker id={`${arrowId}-pink`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11"
+            markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="var(--berry)" /></marker>
+        </defs>
+      </svg>
       <ReactFlow colorMode="dark" defaultNodes={nodes} defaultEdges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
         fitView fitViewOptions={{ padding: .28, maxZoom: nodes.length === 1 ? .8 : 1.15 }} minZoom={.12} maxZoom={2.2}
         nodesDraggable panOnDrag nodesConnectable={false} deleteKeyCode={null}
+        onPaneClick={() => selectTable(null)}
+        onNodeClick={(_, node) => selectTable(node.data.table.id)}
         onNodeDoubleClick={(_, node) => onTable(node.data.table)}
+        onEdgeMouseEnter={(_, edge) => { if (edge.data?.compact) hoverEdge(edge.id) }}
+        onEdgeMouseLeave={(_, edge) => { if (edge.data?.compact) hoverEdge(null) }}
         onEdgeClick={(_, edge) => { if (edge.data) onSelect(edge.data.relation) }}>
         <Background color="#345341" gap={20} size={1} />
         <DiagramControls />
