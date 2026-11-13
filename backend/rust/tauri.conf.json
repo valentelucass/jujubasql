@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "JujubaSQL",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "identifier": "br.nexosql.studio",
   "build": {
     "beforeDevCommand": { "script": "npm run dev", "cwd": "../../frontend" },
@@ -10,7 +10,7 @@
     "frontendDist": "../../frontend/dist"
   },
   "app": {
-    "windows": [{ "label": "main", "title": "JujubaSQL", "width": 1380, "height": 850, "minWidth": 880, "minHeight": 610, "backgroundColor": "#0e1111" }],
+    "windows": [{ "label": "main", "title": "JujubaSQL", "width": 1380, "height": 850, "minWidth": 880, "minHeight": 610, "backgroundColor": "#0c130f" }],
     "security": {
       "capabilities": ["main"],
       "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"

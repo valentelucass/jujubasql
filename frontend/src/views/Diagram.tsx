@@ -89,7 +89,7 @@ function ForeignKeyEdge({ id, source, target, sourceX, sourceY, targetX, targetY
     { x: secondX, y: secondY }, { x: targetX, y: targetY },
   ]
   const label = pointOnCurve(curve, labelPosition)
-  const color = highlighted ? '#8be1c7' : '#52877b'
+  const color = highlighted ? '#a4dea5' : '#679970'
   const relation = data.relation
 
   function endpointBadge(value: string | null, x: number, y: number, side: string) {
@@ -243,7 +243,7 @@ export function Graph({ table, tables = noTables, relations, selected, onSelect,
       id: String(relation.id), source, target, type: 'foreignKey',
       sourceHandle: self ? 'loop-source' : rightward ? 'source-right' : 'source-left',
       targetHandle: self ? 'loop-target' : rightward ? 'target-left' : 'target-right',
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#52877b' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#679970' },
       ariaLabel: relation.name,
       data: { relation, offset },
     }
@@ -264,7 +264,7 @@ export function Graph({ table, tables = noTables, relations, selected, onSelect,
         nodesDraggable panOnDrag nodesConnectable={false} deleteKeyCode={null}
         onNodeDoubleClick={(_, node) => onTable(node.data.table)}
         onEdgeClick={(_, edge) => { if (edge.data) onSelect(edge.data.relation) }}>
-        <Background color="#353d3a" gap={20} size={1} />
+        <Background color="#345341" gap={20} size={1} />
         <DiagramControls />
         {!table && <TableFinder tables={tables} />}
       </ReactFlow>

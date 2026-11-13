@@ -226,10 +226,12 @@ export function App() {
     <StudioLayout items={[]} connected={false}>
       <main className="workspace welcome">
         <div className="welcome-content">
+          <div className="welcome-copy">
+            <h1>Conecte ao SQL Server</h1>
+            <p>Consulte os bancos, explore tabelas e visualize seus relacionamentos.</p>
+            <button className="button primary" onClick={() => setDialog(true)}><Plug size={16} /> Nova conexão <ArrowRight size={16} /></button>
+          </div>
           <div className="welcome-mark" aria-hidden="true"><img src={jujuba} alt="" /></div>
-          <h1>Conecte ao SQL Server</h1>
-          <p>Consulte os bancos, explore tabelas e visualize seus relacionamentos.</p>
-          <button className="button primary" onClick={() => setDialog(true)}><Plug size={16} /> Nova conexão <ArrowRight size={16} /></button>
         </div>
       </main>
       <ConnectionDetails />
