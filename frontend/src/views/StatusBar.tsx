@@ -3,6 +3,7 @@ import { isTauri } from '@tauri-apps/api/core'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { Database as DatabaseIcon, ExternalLink, ShieldCheck } from 'lucide-react'
 import type { Database } from '../models/sql'
+import { UpdateButton } from './DesktopUpdates'
 
 const links = [
   { label: 'Referências', url: 'https://github.com/valentelucass/jujubasql#referências' },
@@ -24,6 +25,7 @@ export function StatusBar({ endpoint, database }: { endpoint?: string; database?
     <span className="status-permissions"><ShieldCheck size={13} /> Permissões do SQL Server</span>
     {database && <span className="status-context"><DatabaseIcon size={12} /> <span>{database}</span></span>}
     <span className="status-end status-context">{endpoint ?? 'Sessão local'}</span>
+    <UpdateButton />
     <nav className="status-links" aria-label="Créditos do JujubaSQL">
       {links.map(({ label, url }) => <a key={url} href={url} target="_blank" rel="noopener noreferrer"
         onClick={(event) => void openLink(event, url)}>

@@ -1,0 +1,74 @@
+name: Release Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: jujubasql-windows-release
+
+jobs:
+  windows:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Verify release version
+        shell: pwsh
+        run: |
+          $version = (Get-Content backend/rust/tauri.conf.json -Raw | ConvertFrom-Json).version
+          $frontend = (Get-Content frontend/package.json -Raw | ConvertFrom-Json).version
+          if ($version -notmatch '^\d+\.\d+\.\d+$' -or $env:GITHUB_REF_NAME -cne "v$version" -or $frontend -ne $version) {
+            throw 'The tag and application versions must match.'
+          }
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Build and sign Windows installer
+        working-directory: frontend
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if (!$env:TAURI_SIGNING_PRIVATE_KEY) { throw 'The updater signing secret is missing.' }
+          npm run desktop -- build --ci --target x86_64-pc-windows-msvc --config '{"bundle":{"createUpdaterArtifacts":true}}'
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Publish installer and update manifest
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          $dir = 'backend/rust/target/x86_64-pc-windows-msvc/release/bundle/nsis'
+          $installer = Get-Item (Join-Path $dir "JujubaSQL_$($tag.Substring(1))_x64-setup.exe") -ErrorAction Stop
+          $signatureFile = "$($installer.FullName).sig"
+          $signature = (Get-Content -LiteralPath $signatureFile -Raw -ErrorAction Stop).Trim()
+          if (!$signature) { throw 'The installer signature is empty.' }
+          $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$tag/$($installer.Name)"
+          $asset = @{ url = $url; signature = $signature }
+          $manifest = @{
+            version = $tag.Substring(1)
+            pub_date = [DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ')
+            platforms = @{ 'windows-x86_64' = $asset; 'windows-x86_64-nsis' = $asset }
+          }
+          $json = Join-Path $dir 'latest.json'
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $json -Encoding utf8NoBOM
+          $existing = gh release view $tag --json isDraft 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            if (!(($existing | ConvertFrom-Json).isDraft)) { throw 'This release is already published.' }
+          } else {
+            gh release create $tag --verify-tag --draft --title "JujubaSQL $tag" --generate-notes
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          }
+          gh release upload $tag $installer.FullName $signatureFile $json --clobber
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          gh release edit $tag --draft=false
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }

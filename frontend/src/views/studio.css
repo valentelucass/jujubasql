@@ -395,6 +395,16 @@ code { font-family: var(--mono); }
 }
 .status-links a svg { color: var(--berry); }
 .status-links a:hover { text-decoration: underline; }
+.update-button {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  padding: 2px 6px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: var(--quiet);
+}
+.update-button:hover, .update-button.available {
+  background: var(--berry-selected); border-color: var(--berry-line); color: var(--berry-text);
+}
+.update-button.available svg { color: var(--berry); }
+.update-dialog progress { width: 100%; margin-top: 10px; accent-color: var(--berry); }
+.update-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
 .status-links a:focus-visible { outline: 2px solid var(--berry); outline-offset: 3px; }
 .status-error {
   position: absolute; inset-inline-end: 12px; bottom: calc(100% + 6px);

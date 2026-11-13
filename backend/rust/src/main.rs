@@ -14,6 +14,7 @@ mod sql_server;
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(connection::Connections::default())
         .invoke_handler(tauri::generate_handler![
             commands::connect,

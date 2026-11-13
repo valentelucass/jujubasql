@@ -4,5 +4,6 @@ import '@fontsource-variable/geist'
 import '@xyflow/react/dist/style.css'
 import './views/studio.css'
 import { App } from './views/App'
+import { DesktopUpdates } from './views/DesktopUpdates'
 
-createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>)
+createRoot(document.getElementById('root')!).render(<StrictMode><DesktopUpdates><App /></DesktopUpdates></StrictMode>)

@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "JujubaSQL",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "identifier": "br.nexosql.studio",
   "build": {
     "beforeDevCommand": { "script": "npm run dev", "cwd": "../../frontend" },
@@ -14,6 +14,13 @@
     "security": {
       "capabilities": ["main"],
       "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDgwN0Q1RUM2QjA4Nzk0REYKUldUZmxJZXd4bDU5Z0Z2ZE14U3loMStGUWJ4aTBQNlh6N2FiN1dyTUpnek9QdzNhVVNvZU04UHIK",
+      "endpoints": ["https://github.com/valentelucass/jujubasql/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" }
     }
   },
   "bundle": { "active": true, "targets": ["nsis"], "icon": ["icons/icon.ico"], "windows": { "nsis": { "installerIcon": "icons/icon.ico", "installMode": "currentUser", "languages": ["PortugueseBR", "English"] } } }
