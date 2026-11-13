@@ -1,5 +1,7 @@
 # JujubaSQL
 
+## ⬇️ [Baixar o instalador para Windows (64 bits)](https://github.com/valentelucass/jujubasql/releases/download/v0.1.15/JujubaSQL_0.1.15_x64-setup.exe)
+
 <img src="frontend/src/assets/jujuba.png" alt="Mascote do JujubaSQL" width="112" />
 
 Aplicativo desktop Windows para consultar bancos de uma instância do SQL Server. O Tauri abre a interface React e executa as consultas e alterações autorizadas no backend Rust local.
